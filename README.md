@@ -11,7 +11,7 @@
 #### Go Modules
 
 * [go.gridfinity.dev](https://go.gridfinity.dev/lkcp9)
-* [go.gridfinity.com](htttps://go.gridfinity.com)
+* [go.gridfinity.com](https://go.gridfinity.com)
 
 #### Source Code
 
