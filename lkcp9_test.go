@@ -29,7 +29,7 @@ func TestGoEnvironment(
 	debug.FreeOSMemory()
 	t.Log(
 		fmt.Sprintf(
-			"\nGo ROOT=%v\nGo version=%v\nGo GOMAXPROCS=%v\nGo NumCPU=%v",
+			"\nGo ROOT=%v\nGo Version=%v\nGo GOMAXPROCS=%v\nGo NumCPU=%v",
 			runtime.GOROOT(),
 			runtime.Version(),
 			runtime.GOMAXPROCS(-1),
