@@ -8,6 +8,11 @@
 
 ### Availability
 
+#### Go Modules
+
+* [go.gridfinity.dev](https://go.gridfinity.dev/lkcp9)
+* [go.gridfinity.com](htttps://go.gridfinity.com)
+
 #### Source Code
 
 * [Gridfinity GitHub](https://gitlab.gridfinity.com/go/lkcp9)
