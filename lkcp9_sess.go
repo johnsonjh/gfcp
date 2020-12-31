@@ -33,11 +33,13 @@ func (
 ) Timeout() bool {
 	return true
 }
+
 func (
 	errTimeout,
 ) Temporary() bool {
 	return true
 }
+
 func (
 	errTimeout,
 ) Error() string {
@@ -48,7 +50,7 @@ const (
 	nonceSize       = 16
 	crcSize         = 4
 	cryptHeaderSize = nonceSize + crcSize
-	KcpMtuLimit        = 1500
+	KcpMtuLimit     = 1500
 	rxFECMulti      = 3
 	acceptBacklog   = 128
 )
@@ -110,7 +112,7 @@ type (
 	}
 )
 
-// newUDPSession create a new udp session for client or server
+// newUDPSession creates a new UDP session (client or server)
 func newUDPSession(
 	conv uint32,
 	dataShards,
@@ -224,6 +226,7 @@ func newUDPSession(
 }
 
 // Read implements net.Conn
+// Function is safe for concurrent access.
 func (
 	s *UDPSession,
 ) Read(
@@ -330,6 +333,7 @@ func (
 		[][]byte{b},
 	)
 }
+
 func (
 	s *UDPSession,
 ) WriteBuffers(
@@ -420,7 +424,7 @@ func (
 	s *UDPSession,
 ) Close() error {
 	updater.removeSession(s)
-	if s.l != nil { // notify listener
+	if s.l != nil {
 		s.l.CloseSession(
 			s.remote,
 		)
@@ -446,21 +450,24 @@ func (
 	return nil
 }
 
-// LocalAddr returns the local network address. The Addr returned is shared by all invocations of LocalAddr, so do not modify it.
+// LocalAddr returns the local network address.
+// The address returned is shared by all invocations of LocalAddr - do not modify it.
 func (
 	s *UDPSession,
 ) LocalAddr() net.Addr {
 	return s.conn.LocalAddr()
 }
 
-// RemoteAddr returns the remote network address. The Addr returned is shared by all invocations of RemoteAddr, so do not modify it.
+// RemoteAddr returns the remote network address.
+// The adress returned is shared by all invocations of RemoteAddr - do not modify it.
 func (
 	s *UDPSession,
 ) RemoteAddr() net.Addr {
 	return s.remote
 }
 
-// SetDeadline sets the deadline associated with the listener. A zero time value disables the deadline.
+// SetDeadline sets a deadline associated with the listener.
+// A zero time value disables a deadline.
 func (
 	s *UDPSession,
 ) SetDeadline(
@@ -501,7 +508,7 @@ func (
 	return nil
 }
 
-// SetWriteDelay delays write for bulk transfer until the next update interval
+// SetWriteDelay delays writes for bulk transfers, until the next update interval.
 func (
 	s *UDPSession,
 ) SetWriteDelay(
@@ -512,7 +519,7 @@ func (
 	s.writeDelay = delay
 }
 
-// SetWindowSize set maximum window size
+// SetWindowSize sets the maximum window size
 func (
 	s *UDPSession,
 ) SetWindowSize(
@@ -527,7 +534,8 @@ func (
 	)
 }
 
-// SetMtu sets the maximum transmission unit(not including UDP header)
+// SetMtu sets the maximum transmission unit
+// This size does not including UDP header itself.
 func (
 	s *UDPSession,
 ) SetMtu(
@@ -536,7 +544,6 @@ func (
 	if mtu > KcpMtuLimit {
 		return false
 	}
-
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.Kcp.SetMtu(
@@ -545,7 +552,7 @@ func (
 	return true
 }
 
-// SetStreamMode toggles the stream mode on/off
+// SetStreamMode toggles the streaming mode on or off
 func (s *UDPSession) SetStreamMode(
 	enable bool,
 ) {
@@ -558,7 +565,8 @@ func (s *UDPSession) SetStreamMode(
 	}
 }
 
-// SetACKNoDelay changes ack flush option, set true to flush ack immediately,
+// SetACKNoDelay changes the ACK flushing option.
+// If set to true, ACKs are flusghed immediately,
 func (
 	s *UDPSession,
 ) SetACKNoDelay(
@@ -569,7 +577,8 @@ func (
 	s.ackNoDelay = nodelay
 }
 
-// SetDUP duplicates udp packets for Kcp output, for testing purpose only
+// SetDUP duplicates UDP packets for Kcp output.
+// Useful for testing, not for normal use.
 func (
 	s *UDPSession,
 ) SetDUP(
@@ -580,7 +589,7 @@ func (
 	s.dup = dup
 }
 
-// SetNoDelay calls nodelay() of Kcp
+// SetNoDelay sets TCP_DELAY, for Kcp.
 func (
 	s *UDPSession,
 ) SetNoDelay(
@@ -599,7 +608,8 @@ func (
 	)
 }
 
-// SetDSCP sets the 6bit DSCP field of IP header, no effect if it's accepted from Listener
+// SetDSCP sets the 6-bit DSCP field of IP header.
+// Has no effect, unless accepted by your Listener.
 func (
 	s *UDPSession,
 ) SetDSCP(
@@ -629,7 +639,8 @@ func (
 	)
 }
 
-// SetReadBuffer sets the socket read buffer, no effect if it's accepted from Listener
+// SetReadBuffer sets the socket read buffer.
+// Has no effect, unless it's accepted by your Listener.
 func (
 	s *UDPSession,
 ) SetReadBuffer(
@@ -649,7 +660,8 @@ func (
 	)
 }
 
-// SetWriteBuffer sets the socket write buffer, no effect if it's accepted from Listener
+// SetWriteBuffer sets the socket write buffer.
+// Has no effect, unless it's accepted by your Listener.
 func (
 	s *UDPSession,
 ) SetWriteBuffer(
@@ -674,9 +686,7 @@ func (
 ) output(
 	buf []byte,
 ) {
-	var (
-		ecc [][]byte
-	)
+	var ecc [][]byte
 	if s.FecEncoder != nil {
 		ecc = s.FecEncoder.Encode(
 			buf,
@@ -764,6 +774,7 @@ func (
 	s.mu.Unlock()
 	return
 }
+
 func (
 	s *UDPSession,
 ) GetConv() uint32 {
@@ -839,12 +850,10 @@ func (
 ) KcpInput(
 	data []byte,
 ) {
-	var (
-		KcpInErrors,
+	var KcpInErrors,
 		fecErrs,
 		fecRecovered,
 		fecParityShards uint64
-	)
 	if s.FecDecoder != nil {
 		if len(
 			data,
@@ -984,8 +993,8 @@ type (
 		sessionLock     sync.Mutex
 		chAccepts       chan *UDPSession // Listen() backlog
 		chSessionClosed chan net.Addr    // session close queue
-		headerSize      int              // the additional header to a KCP frame
-		die             chan struct{}    // notify the listener has closed
+		headerSize      int              // additional header for a Kcp frame
+		die             chan struct{}    // notify when the Listener has closed
 		rd              atomic.Value     // read deadline for Accept()
 		wd              atomic.Value
 	}
@@ -1031,9 +1040,7 @@ func (
 			) < cap(
 				l.chAccepts,
 			) {
-				var (
-					conv uint32
-				)
+				var conv uint32
 				convValid := false
 				if l.FecDecoder != nil {
 					isfec := binary.LittleEndian.Uint16(
@@ -1079,7 +1086,7 @@ func (
 	}
 }
 
-// SetReadBuffer sets the socket read buffer for the Listener
+// SetReadBuffer sets the socket read buffer for the Listener.
 func (
 	l *Listener,
 ) SetReadBuffer(
@@ -1095,7 +1102,7 @@ func (
 	)
 }
 
-// SetWriteBuffer sets the socket write buffer for the Listener
+// SetWriteBuffer sets the socket write buffer for the Listener.
 func (
 	l *Listener,
 ) SetWriteBuffer(
@@ -1111,7 +1118,7 @@ func (
 	)
 }
 
-// SetDSCP sets the 6bit DSCP field of IP header
+// SetDSCP sets the 6-bit DSCP field of IP header.
 func (
 	l *Listener,
 ) SetDSCP(
@@ -1141,7 +1148,8 @@ func (
 	)
 }
 
-// Accept implements the Accept method in the Listener interface; it waits for the next call and returns a generic Conn.
+// Accept implements the Accept method in the Listener interface.
+// It waits until the next call, then returns a generic 'Conn'.
 func (
 	l *Listener,
 ) Accept() (
@@ -1151,16 +1159,14 @@ func (
 	return l.AcceptKCP()
 }
 
-// AcceptKCP accepts a KCP connection
+// AcceptKCP accepts a Kcp connection
 func (
 	l *Listener,
 ) AcceptKCP() (
 	*UDPSession,
 	error,
 ) {
-	var (
-		timeout <-chan time.Time
-	)
+	var timeout <-chan time.Time
 	if tdeadline, ok := l.rd.Load().(time.Time); ok && !tdeadline.IsZero() {
 		timeout = time.After(
 			tdeadline.Sub(
@@ -1180,7 +1186,8 @@ func (
 	}
 }
 
-// SetDeadline sets the deadline associated with the listener. A zero time value disables the deadline.
+// SetDeadline sets the deadline associated with the Listener.
+// A zero value will disable all deadlines.
 func (
 	l *Listener,
 ) SetDeadline(
@@ -1219,7 +1226,8 @@ func (
 	return nil
 }
 
-// Close stops listening on the UDP address. Already Accepted connections are not closed.
+// Close stops listening on the UDP address.
+// Any already accepted connections will not be closed.
 func (
 	l *Listener,
 ) Close() error {
@@ -1229,7 +1237,7 @@ func (
 	return l.conn.Close()
 }
 
-// CloseSession notify the listener that a session has closed
+// CloseSession notifies the Listener when a Session is Closed.
 func (
 	l *Listener,
 ) CloseSession(
@@ -1249,14 +1257,15 @@ func (
 	return false
 }
 
-// Addr returns the listener's network address, The Addr returned is shared by all invocations of Addr, so do not modify it.
+// Addr returns the listener's network address.
+// The address returned is shared by all invocations of Addr - do not modify it.
 func (
 	l *Listener,
 ) Addr() net.Addr {
 	return l.conn.LocalAddr()
 }
 
-// Listen listens for incoming KCP packets addressed to the local address laddr on the network "udp",
+// Listen listens for incoming Kcp packets addressed to our local address (laddr) via "udp"
 func Listen(laddr string) (
 	net.Listener, error) {
 	return ListenWithOptions(
@@ -1267,8 +1276,8 @@ func Listen(laddr string) (
 	)
 }
 
-// ListenWithOptions listens for incoming KCP packets addressed to the local address laddr on the network "udp" with packet encryption,
-// dataShards, parityShards defines Reed-Solomon Erasure Coding parameters
+// ListenWithOptions listens for incoming Kcp packets addressed to our local address (laddr) via "udp"
+// Porvides for encryption, sharding, parity, and RS coding parameters to be specified.
 func ListenWithOptions(
 	laddr string,
 	block BlockCrypt,
@@ -1298,7 +1307,6 @@ func ListenWithOptions(
 			"net.ListenUDP",
 		)
 	}
-
 	return ServeConn(
 		block,
 		dataShards,
@@ -1307,7 +1315,7 @@ func ListenWithOptions(
 	)
 }
 
-// ServeConn serves KCP protocol for a single packet connection.
+// ServeConn serves the Kcp protocol - a single packet is processed.
 func ServeConn(
 	block BlockCrypt,
 	dataShards,
@@ -1349,7 +1357,7 @@ func ServeConn(
 	return l, nil
 }
 
-// Dial connects to the remote address "raddr" on the network "udp"
+// Dial connects to the remote address "raddr" via "udp"
 func Dial(
 	raddr string,
 ) (
@@ -1364,7 +1372,7 @@ func Dial(
 	)
 }
 
-// DialWithOptions connects to the remote address "raddr" on the network "udp" with packet encryption
+// DialWithOptions connects to the remote address "raddr" via "udp" with encryption options.
 func DialWithOptions(
 	raddr string,
 	block BlockCrypt,
@@ -1407,7 +1415,7 @@ func DialWithOptions(
 	)
 }
 
-// NewConn establishes a session and talks KCP protocol over a packet connection.
+// NewConn establishes a session, talking Kcp over a packet connection.
 func NewConn(
 	raddr string,
 	block BlockCrypt,
@@ -1428,9 +1436,7 @@ func NewConn(
 			"net.ResolveUDPAddr",
 		)
 	}
-	var (
-		convid uint32
-	)
+	var convid uint32
 	binary.Read(
 		rand.Reader,
 		binary.LittleEndian,

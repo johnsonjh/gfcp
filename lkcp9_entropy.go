@@ -32,7 +32,8 @@ type KcpNonceMD5 struct {
 
 func (
 	n *KcpNonceMD5,
-) Init() {}
+) Init() {
+}
 
 func (
 	n *KcpNonceMD5,

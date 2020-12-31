@@ -47,9 +47,10 @@ func (
 		batchSize,
 	)
 	for k := range msgs {
-		msgs[k].Buffers = [][]byte{make(
-			[]byte,
-			KcpMtuLimit),
+		msgs[k].Buffers = [][]byte{
+			make(
+				[]byte,
+				KcpMtuLimit),
 		}
 	}
 	conn := ipv6.NewPacketConn(
@@ -103,7 +104,6 @@ func (
 			KcpMtuLimit,
 		)}
 	}
-
 	conn := ipv4.NewPacketConn(
 		s.conn,
 	)
@@ -236,4 +236,3 @@ func (
 		}
 	}
 }
-

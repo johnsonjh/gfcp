@@ -18,10 +18,10 @@ import (
 	"net"
 	"net/http"
 	_ "net/http/pprof"
-	"sync"
-	"testing"
 	"runtime"
 	"runtime/debug"
+	"sync"
+	"testing"
 	"time"
 
 	u "go.gridfinity.dev/leaktestfe"
@@ -30,10 +30,10 @@ import (
 )
 
 const (
-	portEcho           = "127.0.0.1:9999"
-	portSink           = "127.0.0.1:19999"
-	portTinyBufferEcho = "127.0.0.1:29999"
-	portListerner      = "127.0.0.1:9998"
+	portEcho           = "127.0.0.1:9079"
+	portSink           = "127.0.0.1:19609"
+	portTinyBufferEcho = "127.0.0.1:29609"
+	portListerner      = "127.0.0.1:9078"
 )
 
 var (
@@ -53,7 +53,7 @@ func init() {
 	go func() {
 		log.Println(
 			http.ListenAndServe(
-				"localhost:6060",
+				"127.0.0.1:8881",
 				nil,
 			))
 	}()
@@ -62,7 +62,7 @@ func init() {
 	go sinkServer()
 	go tinyBufferEchoServer()
 	println(
-		"beginning tests, encryption:salsa20, fec:10/3",
+		"Beginning tests:\nEncryption: Salsa20n\nFEC: 10/3",
 	)
 }
 
@@ -84,7 +84,6 @@ func dialEcho() (
 			err,
 		)
 	}
-
 	sess.SetStreamMode(
 		true,
 	)
@@ -148,7 +147,6 @@ func dialSink() (
 			err,
 		)
 	}
-
 	sess.SetStreamMode(
 		true,
 	)
@@ -217,7 +215,6 @@ func listenEcho() (
 		10,
 		3,
 	)
-
 }
 
 func listenTinyBufferEcho() (
@@ -268,8 +265,8 @@ func echoServer() {
 			if err != nil {
 				return
 			}
-			s.(*lkcp9.UDPSession).SetReadBuffer( 4 * 1024 * 1024 )
-			s.(*lkcp9.UDPSession).SetWriteBuffer( 4 * 1024 * 1024 )
+			s.(*lkcp9.UDPSession).SetReadBuffer(4 * 1024 * 1024)
+			s.(*lkcp9.UDPSession).SetWriteBuffer(4 * 1024 * 1024)
 			go handleEcho(s.(*lkcp9.UDPSession))
 		}
 	}()
@@ -284,7 +281,6 @@ func sinkServer() {
 			err,
 		)
 	}
-
 	go func() {
 		Kcplistener := l.(*lkcp9.Listener)
 		Kcplistener.SetReadBuffer(
@@ -566,17 +562,17 @@ func TestSendVector(
 	for i := 0; i < N; i++ {
 		v[0] = []byte(
 			fmt.Sprintf(
-				"hello%v",
+				"holas%v",
 				i,
 			))
 		v[1] = []byte(
 			fmt.Sprintf(
-				"world%v",
+				"amigo%v",
 				i,
 			))
 		msg :=
 			fmt.Sprintf(
-				"hello%vworld%v",
+				"holas%vamigo%v",
 				i,
 				i,
 			)
@@ -633,7 +629,6 @@ func TestTinyBufferReceiver(
 			snd++
 		}
 	}
-
 	rcv := byte(
 		0,
 	)
@@ -701,7 +696,6 @@ func TestClose(
 		[]byte,
 		10,
 	)
-
 	cli.Close()
 	if cli.Close() == nil {
 		t.Fail()
@@ -723,13 +717,13 @@ func TestClose(
 	debug.FreeOSMemory()
 }
 
-func TestParallelConcurrent_2048_Clients_128_byteMessages_128_Iterations(
+func TestMassivelyParallel_Concurrent_2048_Clients_128_byte_Messages_128_Iterations(
 	t *testing.T,
 ) {
 	runtime.GC()
 	debug.FreeOSMemory()
 	t.Parallel()
-	_ = runtime.GOMAXPROCS(runtime.NumCPU() * 16);
+	_ = runtime.GOMAXPROCS(runtime.NumCPU() * 16)
 	t.Log(fmt.Sprintf("Starting Goroutines=%v", runtime.NumGoroutine()))
 	defer u.Leakplug(
 		t,
@@ -743,9 +737,9 @@ func TestParallelConcurrent_2048_Clients_128_byteMessages_128_Iterations(
 			&wg,
 		)
 	}
-    t.Log(fmt.Sprintf("Activate Goroutines=%v", runtime.NumGoroutine()))
+	t.Log(fmt.Sprintf("Activate Goroutines=%v", runtime.NumGoroutine()))
 	wg.Wait()
-    t.Log(fmt.Sprintf("Utilized Goroutines=%v", runtime.NumGoroutine()))
+	t.Log(fmt.Sprintf("Utilized Goroutines=%v", runtime.NumGoroutine()))
 	runtime.GC()
 	debug.FreeOSMemory()
 }

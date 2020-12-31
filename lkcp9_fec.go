@@ -20,8 +20,8 @@ import (
 const (
 	fecHeaderSize      = 6
 	fecHeaderSizePlus2 = fecHeaderSize + 2
-	KTypeData           = 0xf1
-	KTypeParity         = 0xf2
+	KTypeData          = 0xf1
+	KTypeParity        = 0xf2
 )
 
 type FecPacket []byte
@@ -33,6 +33,7 @@ func (
 		bts,
 	)
 }
+
 func (
 	bts FecPacket,
 ) flag() uint16 {
@@ -40,6 +41,7 @@ func (
 		bts[4:],
 	)
 }
+
 func (bts FecPacket) data() []byte {
 	return bts[6:]
 }
@@ -98,15 +100,13 @@ func KcpNewDECDecoder(
 	return dec
 }
 
-
 func (dec *FecDecoder) Decode(in FecPacket) (recovered [][]byte) {
-	// insertion
 	n := len(dec.rx) - 1
 	insertIdx := 0
 	for i := n; i >= 0; i-- {
-		if in.seqid() == dec.rx[i].seqid() { // de-duplicate
+		if in.seqid() == dec.rx[i].seqid() {
 			return nil
-		} else if _itimediff(in.seqid(), dec.rx[i].seqid()) > 0 { // insertion
+		} else if _itimediff(in.seqid(), dec.rx[i].seqid()) > 0 {
 			insertIdx = i + 1
 			break
 		}
@@ -116,20 +116,17 @@ func (dec *FecDecoder) Decode(in FecPacket) (recovered [][]byte) {
 	pkt := FecPacket(KxmitBuf.Get().([]byte)[:len(in)])
 	copy(pkt, in)
 
-	// insert into ordered rx queue
 	if insertIdx == n+1 {
 		dec.rx = append(dec.rx, pkt)
 	} else {
 		dec.rx = append(dec.rx, FecPacket{})
-		copy(dec.rx[insertIdx+1:], dec.rx[insertIdx:]) // shift right
+		copy(dec.rx[insertIdx+1:], dec.rx[insertIdx:])
 		dec.rx[insertIdx] = pkt
 	}
 
-	// shard range for current packet
 	shardBegin := pkt.seqid() - pkt.seqid()%uint32(dec.shardSize)
 	shardEnd := shardBegin + uint32(dec.shardSize) - 1
 
-	// max search range in ordered queue for current shard
 	searchBegin := insertIdx - int(pkt.seqid()%uint32(dec.shardSize))
 	if searchBegin < 0 {
 		searchBegin = 0
@@ -139,11 +136,9 @@ func (dec *FecDecoder) Decode(in FecPacket) (recovered [][]byte) {
 		searchEnd = len(dec.rx) - 1
 	}
 
-	// re-construct datashards
 	if searchEnd-searchBegin+1 >= dec.dataShards {
 		var numshard, numDataShard, first, maxlen int
 
-		// zero caches
 		shards := dec.DecodeCache
 		shardsflag := dec.flagCache
 		for k := range dec.DecodeCache {
@@ -151,7 +146,6 @@ func (dec *FecDecoder) Decode(in FecPacket) (recovered [][]byte) {
 			shardsflag[k] = false
 		}
 
-		// shard assembly
 		for i := searchBegin; i <= searchEnd; i++ {
 			seqid := dec.rx[i].seqid()
 			if _itimediff(seqid, shardEnd) > 0 {
@@ -173,10 +167,8 @@ func (dec *FecDecoder) Decode(in FecPacket) (recovered [][]byte) {
 		}
 
 		if numDataShard == dec.dataShards {
-			// case 1: no loss on data shards
 			dec.rx = dec.freeRange(first, numshard, dec.rx)
 		} else if numshard >= dec.dataShards {
-			// case 2: loss on data shards, but it's recoverable from parity shards
 			for k := range shards {
 				if shards[k] != nil {
 					dlen := len(shards[k])
@@ -189,7 +181,6 @@ func (dec *FecDecoder) Decode(in FecPacket) (recovered [][]byte) {
 			if err := dec.codec.ReconstructData(shards); err == nil {
 				for k := range shards[:dec.dataShards] {
 					if !shardsflag[k] {
-						// recovered data should be recycled
 						recovered = append(recovered, shards[k])
 					}
 				}
@@ -198,9 +189,8 @@ func (dec *FecDecoder) Decode(in FecPacket) (recovered [][]byte) {
 		}
 	}
 
-	// keep rxlimit
 	if len(dec.rx) > dec.rxlimit {
-		if dec.rx[0].flag() == KTypeData { // track the unrecoverable data
+		if dec.rx[0].flag() == KTypeData {
 			atomic.AddUint64(&DefaultSnsi.KcpFECRuntShards, 1)
 		}
 		dec.rx = dec.freeRange(0, 1, dec.rx)
@@ -209,7 +199,7 @@ func (dec *FecDecoder) Decode(in FecPacket) (recovered [][]byte) {
 }
 
 func (dec *FecDecoder) freeRange(first, n int, q []FecPacket) []FecPacket {
-	for i := first; i < first+n; i++ { // recycle buffer
+	for i := first; i < first+n; i++ {
 		KxmitBuf.Put([]byte(q[i]))
 	}
 
@@ -220,22 +210,21 @@ func (dec *FecDecoder) freeRange(first, n int, q []FecPacket) []FecPacket {
 	return q[:len(q)-n]
 }
 
-
 type (
 	FecEncoder struct {
-		dataShards   int
-		parityShards int
-		shardSize    int
-		paws         uint32 // Protect Against Wrapped Sequence numbers
-		next         uint32 // next seqid
-		shardCount int // count the number of datashards collected
-		maxSize    int // track maximum data length in datashard
-		headerOffset  int // FEC header offset
-		payloadOffset int // FEC payload offset
-		shardCache  [][]byte
-		EncodeCache [][]byte
-		zeros []byte
-		codec reedsolomon.Encoder
+		dataShards    int
+		parityShards  int
+		shardSize     int
+		paws          uint32 // Protect Against Wrapped Sequence numbers
+		next          uint32 // next seqid
+		shardCount    int    // count the number of datashards collected
+		maxSize       int    // track maximum data length in datashard
+		headerOffset  int    // FEC header offset
+		payloadOffset int    // FEC payload offset
+		shardCache    [][]byte
+		EncodeCache   [][]byte
+		zeros         []byte
+		codec         reedsolomon.Encoder
 	}
 )
 

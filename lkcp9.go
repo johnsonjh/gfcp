@@ -148,19 +148,19 @@ func _itimediff(
 }
 
 type KcpSegment struct {
-	conv     uint32
-	cmd      uint8
-	frg      uint8
-	wnd      uint16
-	ts       uint32
-	sn       uint32
-	una      uint32
-	rto      uint32
-	Kxmit    uint32
+	conv        uint32
+	cmd         uint8
+	frg         uint8
+	wnd         uint16
+	ts          uint32
+	sn          uint32
+	una         uint32
+	rto         uint32
+	Kxmit       uint32
 	KcpResendTs uint32
-	fastack  uint32
-	acked    uint32
-	data     []byte
+	fastack     uint32
+	acked       uint32
+	data        []byte
 }
 
 func (
@@ -197,8 +197,13 @@ func (
 		KcpSeg.una,
 	)
 	ptr = iKcp_encode32u(
-		ptr, uint32(len(KcpSeg.data)))
-	atomic.AddUint64(&DefaultSnsi.KcpOutputSegments, 1)
+		ptr, uint32(len(
+			KcpSeg.data,
+		)))
+	atomic.AddUint64(
+		&DefaultSnsi.KcpOutputSegments,
+		1,
+	)
 	return ptr
 }
 
@@ -230,8 +235,7 @@ type ackItem struct {
 	ts uint32
 }
 
-// NewKCP create a new Kcp control object, 'conv' must equal in two endpoint
-// from the same connection.
+// NewKCP creates a new Kcp control object.
 func NewKCP(
 	conv uint32,
 	output output_callback,
@@ -281,9 +285,8 @@ func (Kcp *KCP) delSegment(
 	}
 }
 
-// ReserveBytes keeps n bytes untouched from the beginning of the buffer
-// the output_callback function should be aware of this
-// return false if n >= mss
+// ReserveBytes keeps 'n' bytes from the beginning of buffering.
+// Output callbacks use this to return 'false' if 'n' >= 'mss'.
 func (
 	Kcp *KCP,
 ) ReserveBytes(
@@ -301,7 +304,7 @@ func (
 	return true
 }
 
-// PeekSize checks the size of next message in the recv queue
+// PeekSize checks the size of next message in the receive queue.
 func (
 	Kcp *KCP,
 ) PeekSize() (
@@ -335,7 +338,7 @@ func (
 	return
 }
 
-// Recv is user/upper level recv: returns size, returns below zero for EAGAIN
+// Recv is upper level recviver; returns size or EAGAIN on error.
 func (
 	Kcp *KCP,
 ) Recv(
@@ -393,7 +396,9 @@ func (
 	count = 0
 	for k := range Kcp.rcv_buf {
 		KcpSeg := &Kcp.rcv_buf[k]
-		if KcpSeg.sn == Kcp.rcv_nxt && len(Kcp.rcv_queue) < int(Kcp.rcv_wnd) {
+		if KcpSeg.sn == Kcp.rcv_nxt && len(
+			Kcp.rcv_queue,
+		) < int(Kcp.rcv_wnd) {
 			Kcp.rcv_nxt++
 			count++
 		} else {
@@ -410,13 +415,15 @@ func (
 			count,
 		)
 	}
-	if len(Kcp.rcv_queue) < int(Kcp.rcv_wnd) && fast_recover {
+	if len(
+		Kcp.rcv_queue,
+	) < int(Kcp.rcv_wnd) && fast_recover {
 		Kcp.probe |= IKCP_ASK_TELL
 	}
 	return
 }
 
-// Send is user/upper level send, returns below zero for error
+// Send is upper level sender, returns <0 on error.
 func (
 	Kcp *KCP,
 ) Send(
@@ -486,7 +493,9 @@ func (
 				buffer,
 			)
 		}
-		KcpSeg := Kcp.newSegment(size)
+		KcpSeg := Kcp.newSegment(
+			size,
+		)
 		copy(
 			KcpSeg.data,
 			buffer[:size],
@@ -540,8 +549,12 @@ func (
 	)
 }
 
-func (Kcp *KCP) shrink_buf() {
-	if len(Kcp.SndBuf) > 0 {
+func (
+	Kcp *KCP,
+) shrink_buf() {
+	if len(
+		Kcp.SndBuf,
+	) > 0 {
 		KcpSeg := &Kcp.SndBuf[0]
 		Kcp.snd_una = KcpSeg.sn
 	} else {
@@ -559,7 +572,8 @@ func (
 		Kcp.snd_una,
 	) < 0 || _itimediff(
 		sn,
-		Kcp.snd_nxt) >= 0 {
+		Kcp.snd_nxt,
+	) >= 0 {
 		return
 	}
 
@@ -742,8 +756,8 @@ func (
 	return repeat
 }
 
-// Input when you received a low level packet (eg. UDP packet), call it
-// regular indicates a regular packet has received(not from FEC)
+// Input receives a (low-level) UDP packet, and determinines if
+// a complete packet has processsedd (not by the FEC algorithm.)
 func (
 	Kcp *KCP,
 ) Input(
@@ -761,20 +775,14 @@ func (
 	var flag int
 	var inSegs uint64
 	for {
-		var (
-			ts,
+		var ts,
 			sn,
 			length,
 			una,
 			conv uint32
-		)
-		var (
-			wnd uint16
-		)
-		var (
-			cmd,
+		var wnd uint16
+		var cmd,
 			frg uint8
-		)
 		if len(
 			data,
 		) < int(IKCP_OVERHEAD) {
@@ -979,7 +987,6 @@ func (
 			ptr = buffer[Kcp.reserved:]
 		}
 	}
-
 	FlushBuffer := func() {
 		size := len(
 			buffer,
@@ -993,7 +1000,6 @@ func (
 			)
 		}
 	}
-
 	for i, ack := range Kcp.acklist {
 		makeSpace(
 			IKCP_OVERHEAD,
@@ -1033,7 +1039,6 @@ func (
 	}
 	Kcp.ts_probe = 0
 	Kcp.probe_wait = 0
-
 	if (Kcp.probe & IKCP_ASK_SEND) != 0 {
 		KcpSeg.cmd = IKCP_CMD_WASK
 		makeSpace(
@@ -1093,15 +1098,12 @@ func (
 		resent = 0xFFFFFFFF
 	}
 	current := KcpCurrentMs()
-	var (
-		change,
+	var change,
 		lost,
 		lostSegs,
 		fastKcpRestransmittedSegments,
 		earlyKcpRestransmittedSegments uint64
-	)
 	minrto := int32(Kcp.interval)
-
 	ref := Kcp.SndBuf[:len(
 		Kcp.SndBuf,
 	)]
@@ -1233,15 +1235,12 @@ func (
 	)
 }
 
-// Update updates state (call it repeatedly, every 10ms-100ms), or you can ask
-// iKcp_check when to call it again (without iKcp_input/_send calling).
-// 'current' - current timestamp in millisec.
+// Update is called repeatedly, 10ms to 100ms, queried via iKcp_check
+// without iKcp_input or _send executing, returning timestamp in ms.
 func (
 	Kcp *KCP,
 ) Update() {
-	var (
-		slap int32
-	)
+	var slap int32
 	current := KcpCurrentMs()
 	if Kcp.updated == 0 {
 		Kcp.updated = 1
@@ -1269,13 +1268,13 @@ func (
 	}
 }
 
-// Check determines when should you invoke iKcp_update:
-// returns when you should invoke iKcp_update in millisec, if there
-// is no iKcp_input/_send calling. you can call iKcp_update in that
-// time, instead of call update repeatly.
-// Important to reduce unnacessary iKcp_update invoking. use it to
-// schedule iKcp_update (eg. implementing an epoll-like mechanism,
-// or optimize iKcp_update when handling massive Kcp connections)
+// Check function helps determine when to invoke an iKcp_update.
+// It returns when you should invoke iKcp_update, in milliseconds,
+// if there is no iKcp_input or _send calling. You may repeatdly
+// call iKcp_update instead of update, to reduce most unnacessary
+// iKcp_update invocations. This function may be used to schedule
+// iKcp_updates, when implementing an epoll-like mechanism, or for
+// optimizing an iKcp_update loop handling massive Kcp connections.
 func (
 	Kcp *KCP,
 ) Check() uint32 {
@@ -1330,7 +1329,8 @@ func (
 	return current + minimal
 }
 
-// SetMtu changes MTU size, default is 1400
+// SetMtu changes MTU size.
+// Defult MTU is 1400 byes.
 func (
 	Kcp *KCP,
 ) SetMtu(
@@ -1355,12 +1355,12 @@ func (
 	return 0
 }
 
-// NoDelay options
-// fastest: iKcp_nodelay(Kcp, 1, 20, 2, 1)
-// nodelay: 0:disable(default), 1:enable
-// interval: internal update timer interval in millisec, default is 100ms
-// resend: 0:disable fast resend(default), 1:enable fast resend
-// nc: 0:normal congestion control(default), 1:disable congestion control
+// NoDelay options:
+// * fastest:	iKcp_nodelay(Kcp, 1, 20, 2, 1)
+// * nodelay:	0: disable (default), 1: enable
+// * interval:	internal update timer interval in milliseconds, defaults to 100ms
+// * resend:	0: disable fast resends (default), 1: enable fast resends
+// * nc:		0: normal congestion control (default), 1: disable congestion control
 func (
 	Kcp *KCP,
 ) NoDelay(
@@ -1394,7 +1394,7 @@ func (
 	return 0
 }
 
-// WndSize sets maximum window size: sndwnd=32, rcvwnd=32 by default
+// WndSize sets maximum window size (efaults: sndwnd=32 and rcvwnd=32)
 func (
 	Kcp *KCP,
 ) WndSize(
@@ -1410,7 +1410,7 @@ func (
 	return 0
 }
 
-// WaitSnd gets how many packet is waiting to be sent
+// WaitSnd shows how many packets are queued to be sent
 func (
 	Kcp *KCP,
 ) WaitSnd() int {
@@ -1440,6 +1440,7 @@ func (
 }
 
 func init() {
+	// Register the MIT License
 	lkcp9Legal.RegisterLicense(
 		"\nThe MIT License (MIT)\n\nCopyright © 2015 Daniel Fu <daniel820313@gmail.com>.\nCopyright © 2019 Loki 'l0k18' Verloren <stalker.loki@protonmail.ch>.\nCopyright © 2020 Gridfinity, LLC. <admin@gridfinity.com>.\nCopyright © 2020 Jeffrey H. Johnson <jeff@gridfinity.com>.\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including, without limitation, the rights\nto use, copy, modify, merge, publish, distribute, sub-license, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice, and this permission notice, shall be\nincluded in all copies, or substantial portions, of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING, BUT NOT LIMITED TO, THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF, OR IN CONNECTION WITH THE SOFTWARE, OR THE USE OR OTHER DEALINGS IN\nTHE SOFTWARE.\n",
 	)

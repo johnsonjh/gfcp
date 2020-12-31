@@ -23,19 +23,19 @@ import (
 func TestGoEnvironment(
 	t *testing.T,
 ) {
-   defer u.Leakplug(
-	   t,
-   )
-   debug.FreeOSMemory()
-   t.Log(
-	   fmt.Sprintf(
-		   "\nGo ROOT=%v\nGo version=%v\nGo GOMAXPROCS=%v\nGo NumCPU=%v",
-		   runtime.GOROOT(),
-		   runtime.Version(),
-		   runtime.GOMAXPROCS(-1),
-		   runtime.NumCPU(),
-	   ),
-   )
+	defer u.Leakplug(
+		t,
+	)
+	debug.FreeOSMemory()
+	t.Log(
+		fmt.Sprintf(
+			"\nGo ROOT=%v\nGo version=%v\nGo GOMAXPROCS=%v\nGo NumCPU=%v",
+			runtime.GOROOT(),
+			runtime.Version(),
+			runtime.GOMAXPROCS(-1),
+			runtime.NumCPU(),
+		),
+	)
 }
 
 func Testlkcp9License(
@@ -54,7 +54,7 @@ func Testlkcp9License(
 	} else {
 		t.Log(
 			fmt.Sprintf(
-				"\n%v\n",
+				"\nEmbedded Licesnse data:\n%v\n",
 				licenses,
 			),
 		)

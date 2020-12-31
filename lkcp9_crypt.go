@@ -31,7 +31,8 @@ var (
 		167, 115, 79, 156,
 		18, 172, 27, 1,
 		164, 21, 242, 193,
-		252, 120, 230, 107}
+		252, 120, 230, 107,
+	}
 	saltxor = `sH3CIVoF#rWLtJo6`
 )
 
@@ -42,7 +43,7 @@ type digest struct {
 	len uint64
 }
 
-// BlockCrypt defines encryption/decryption methods for a given byte slice.
+// BlockCrypt defines crypto methods for a given byte slice
 type BlockCrypt interface {
 	Encrypt(
 		dst,
@@ -58,7 +59,7 @@ type salsa20BlockCrypt struct {
 	key [32]byte
 }
 
-// NewSalsa20BlockCrypt
+// NewSalsa20BlockCrypt function
 func NewSalsa20BlockCrypt(
 	key []byte,
 ) (
@@ -86,7 +87,6 @@ func (
 		src[8:],
 		src[:8],
 		&c.key)
-
 	copy(
 		dst[:8],
 		src[:8],
@@ -104,7 +104,6 @@ func (
 		src[8:],
 		src[:8],
 		&c.key)
-
 	copy(
 		dst[:8],
 		src[:8],
@@ -117,7 +116,7 @@ type sm4BlockCrypt struct {
 	block  cipher.Block
 }
 
-// NewSM4BlockCrypt
+// NewSM4BlockCrypt function
 func NewSM4BlockCrypt(
 	key []byte,
 ) (
@@ -136,6 +135,7 @@ func NewSM4BlockCrypt(
 	c.block = block
 	return c, nil
 }
+
 func (
 	c *sm4BlockCrypt,
 ) Encrypt(
@@ -149,6 +149,7 @@ func (
 		c.encbuf[:],
 	)
 }
+
 func (
 	c *sm4BlockCrypt,
 ) Decrypt(
@@ -169,7 +170,7 @@ type aesBlockCrypt struct {
 	block  cipher.Block
 }
 
-// NewAESBlockCrypt
+// NewAESBlockCrypt function
 func NewAESBlockCrypt(
 	key []byte,
 ) (
@@ -188,6 +189,7 @@ func NewAESBlockCrypt(
 	c.block = block
 	return c, nil
 }
+
 func (
 	c *aesBlockCrypt,
 ) Encrypt(
@@ -201,6 +203,7 @@ func (
 		c.encbuf[:],
 	)
 }
+
 func (
 	c *aesBlockCrypt,
 ) Decrypt(
@@ -219,7 +222,7 @@ type simpleXORBlockCrypt struct {
 	xortbl []byte
 }
 
-// NewSimpleXORBlockCrypt
+// NewSimpleXORBlockCrypt function
 func NewSimpleXORBlockCrypt(
 	key []byte,
 ) (
@@ -238,6 +241,7 @@ func NewSimpleXORBlockCrypt(
 	)
 	return c, nil
 }
+
 func (
 	c *simpleXORBlockCrypt,
 ) Encrypt(
@@ -250,6 +254,7 @@ func (
 		c.xortbl,
 	)
 }
+
 func (
 	c *simpleXORBlockCrypt,
 ) Decrypt(
@@ -265,7 +270,7 @@ func (
 
 type noneBlockCrypt struct{}
 
-// NewNoneBlockCrypt does nothing but copying
+// NewNoneBlockCrypt function (null encryption)
 func NewNoneBlockCrypt(
 	key []byte,
 ) (
@@ -276,6 +281,7 @@ func NewNoneBlockCrypt(
 		noneBlockCrypt,
 	), nil
 }
+
 func (
 	c *noneBlockCrypt,
 ) Encrypt(
@@ -287,6 +293,7 @@ func (
 		src,
 	)
 }
+
 func (
 	c *noneBlockCrypt,
 ) Decrypt(
@@ -298,6 +305,7 @@ func (
 		src,
 	)
 }
+
 func encrypt(
 	block cipher.Block,
 	dst,

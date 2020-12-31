@@ -15,32 +15,32 @@ import (
 	"sync/atomic"
 )
 
-// Snsi defines network statistics indicator
+// Snsi: Simple Network Statistics Indicators
 type Snsi struct {
-	KcpBytesSent        uint64 // bytes sent from upper level
-	KcpBytesReceived    uint64 // bytes received to upper level
-	MaxConn          uint64 // max number of connections ever reached
-	KcpActiveOpen      uint64 // accumulated active open connections
-	KcpPassiveOpen     uint64 // accumulated passive open connections
-	KcpNowEstablished        uint64 // current number of established connections
-	KcpPreInputErrors           uint64 // UDP read errors reported from net.PacketConn
-	KcpChecksumFailures     uint64 // checksum errors from CRC32
-	KcpInputErrors      uint64 // packet iput errors reported from KCP
-	KcpInputPackets           uint64 // incoming packets count
-	KcpOutputPackets          uint64 // outgoing packets count
-	KcpInputSegments           uint64 // incoming KCP KSegments
-	KcpOutputSegments          uint64 // outgoing KCP KSegments
-	KcpInputBytes          uint64 // UDP bytes received
-	KcpOutputBytes         uint64 // UDP bytes sent
-	KcpRestransmittedSegments      uint64 // accmulated retransmited KSegments
-	FastKcpRestransmittedSegments  uint64 // accmulated fast retransmitted KSegments
-	EarlyKcpRestransmittedSegments uint64 // accmulated early retransmitted KSegments
-	LostSegments         uint64 // number of segs infered as lost
-	DuplicateSegments       uint64 // number of segs duplicated
-	KcpFECRecovered     uint64 // correct packets recovered from FEC
-	KcpFailures          uint64 // incorrect packets recovered from FEC
-	KcpFECParityShards  uint64 // FEC KSegments received
-	KcpFECRuntShards   uint64 // number of data shards that's not enough for recovery
+	KcpBytesSent                   uint64 // Bytes sent from upper level
+	KcpBytesReceived               uint64 // Bytes received to upper level
+	MaxConn                        uint64 // Max number of connections ever reached
+	KcpActiveOpen                  uint64 // Accumulated active open connections
+	KcpPassiveOpen                 uint64 // Accumulated passive open connections
+	KcpNowEstablished              uint64 // Current number of established connections
+	KcpPreInputErrors              uint64 // UDP read errors reported from net.PacketConn
+	KcpChecksumFailures            uint64 // Checksum errors from CRC32
+	KcpInputErrors                 uint64 // Packet input errors reported from KCP
+	KcpInputPackets                uint64 // Incoming packets count
+	KcpOutputPackets               uint64 // Outgoing packets count
+	KcpInputSegments               uint64 // Incoming KCP KSegments
+	KcpOutputSegments              uint64 // Outgoing KCP KSegments
+	KcpInputBytes                  uint64 // UDP bytes received
+	KcpOutputBytes                 uint64 // UDP bytes sent
+	KcpRestransmittedSegment       uint64 // Accmulated retransmited KSegments
+	FastKcpRestransmittedSegments  uint64 // Accmulated fast retransmitted KSegments
+	EarlyKcpRestransmittedSegments uint64 // Accmulated early retransmitted KSegments
+	LostSegments                   uint64 // Number of segs infered as lost
+	DuplicateSegments              uint64 // Number of segs duplicated
+	KcpFECRecovered                uint64 // Correct packets recovered from FEC
+	KcpFailures                    uint64 // Incorrect packets recovered from FEC
+	KcpFECParityShards             uint64 // FEC KSegments received
+	KcpFECRuntShards               uint64 // Number of data shards insufficient for recovery
 }
 
 func newSnsi() *Snsi {
@@ -81,7 +81,7 @@ func (
 	}
 }
 
-// ToSlice returns current snmp info as slice
+// ToSlice returns current Snsi info as a slice
 func (
 	s *Snsi,
 ) ToSlice() []string {
@@ -89,10 +89,10 @@ func (
 	return []string{
 		fmt.Sprint(
 			snmp.KcpBytesSent,
-	),
+		),
 		fmt.Sprint(
 			snmp.KcpBytesReceived,
-	),
+		),
 		fmt.Sprint(
 			snmp.MaxConn,
 		),
@@ -162,7 +162,7 @@ func (
 	}
 }
 
-// Copy make a copy of current snmp snapshot
+// Copy makes a copy of current Snsi snapshot
 func (
 	s *Snsi,
 ) Copy() *Snsi {
@@ -242,7 +242,7 @@ func (
 	return d
 }
 
-// Reset values to zero
+// Reset sets all Snsi values to zero
 func (s *Snsi) Reset() {
 	atomic.StoreUint64(
 		&s.KcpBytesSent,
@@ -342,7 +342,7 @@ func (s *Snsi) Reset() {
 	)
 }
 
-// DefaultSnsi is the global KCP connection statistics collector
+// DefaultSnsi is the LKCP9 default statistics collector
 var (
 	DefaultSnsi *Snsi
 )

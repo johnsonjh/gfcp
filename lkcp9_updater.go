@@ -41,6 +41,7 @@ func (
 		h.entries,
 	)
 }
+
 func (
 	h *updateHeap,
 ) Less(
@@ -49,7 +50,7 @@ func (
 ) bool {
 	return h.entries[i].ts.Before(
 		h.entries[j].ts,
-	) 
+	)
 }
 
 func (
@@ -66,7 +67,7 @@ func (
 func (
 	h *updateHeap,
 ) Push(
-x interface{},
+	x interface{},
 ) {
 	h.entries = append(
 		h.entries,

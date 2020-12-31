@@ -23,9 +23,7 @@ func (
 		[]byte,
 		KcpMtuLimit,
 	)
-	var (
-		src string
-	)
+	var src string
 	for {
 		if n, addr, err := s.conn.ReadFrom(
 			buf,
@@ -83,4 +81,3 @@ func (
 		}
 	}
 }
-
