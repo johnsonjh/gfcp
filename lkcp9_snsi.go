@@ -32,7 +32,7 @@ type Snsi struct {
 	KcpOutputSegments              uint64 // Outgoing KCP KSegments
 	KcpInputBytes                  uint64 // UDP bytes received
 	KcpOutputBytes                 uint64 // UDP bytes sent
-	KcpRestransmittedSegment       uint64 // Accmulated retransmited KSegments
+	KcpRestransmittedSegments      uint64 // Accmulated retransmited KSegments
 	FastKcpRestransmittedSegments  uint64 // Accmulated fast retransmitted KSegments
 	EarlyKcpRestransmittedSegments uint64 // Accmulated early retransmitted KSegments
 	LostSegments                   uint64 // Number of segs infered as lost
@@ -85,79 +85,79 @@ func (
 func (
 	s *Snsi,
 ) ToSlice() []string {
-	snmp := s.Copy()
+	snsi := s.Copy()
 	return []string{
 		fmt.Sprint(
-			snmp.KcpBytesSent,
+			snsi.KcpBytesSent,
 		),
 		fmt.Sprint(
-			snmp.KcpBytesReceived,
+			snsi.KcpBytesReceived,
 		),
 		fmt.Sprint(
-			snmp.MaxConn,
+			snsi.MaxConn,
 		),
 		fmt.Sprint(
-			snmp.KcpActiveOpen,
+			snsi.KcpActiveOpen,
 		),
 		fmt.Sprint(
-			snmp.KcpPassiveOpen,
+			snsi.KcpPassiveOpen,
 		),
 		fmt.Sprint(
-			snmp.KcpNowEstablished,
+			snsi.KcpNowEstablished,
 		),
 		fmt.Sprint(
-			snmp.KcpInputErrors,
+			snsi.KcpInputErrors,
 		),
 		fmt.Sprint(
-			snmp.KcpChecksumFailures,
+			snsi.KcpChecksumFailures,
 		),
 		fmt.Sprint(
-			snmp.KcpInputErrors,
+			snsi.KcpInputErrors,
 		),
 		fmt.Sprint(
-			snmp.KcpInputPackets,
+			snsi.KcpInputPackets,
 		),
 		fmt.Sprint(
-			snmp.KcpOutputPackets,
+			snsi.KcpOutputPackets,
 		),
 		fmt.Sprint(
-			snmp.KcpInputSegments,
+			snsi.KcpInputSegments,
 		),
 		fmt.Sprint(
-			snmp.KcpOutputSegments,
+			snsi.KcpOutputSegments,
 		),
 		fmt.Sprint(
-			snmp.KcpInputBytes,
+			snsi.KcpInputBytes,
 		),
 		fmt.Sprint(
-			snmp.KcpOutputBytes,
+			snsi.KcpOutputBytes,
 		),
 		fmt.Sprint(
-			snmp.KcpRestransmittedSegments,
+			snsi.KcpRestransmittedSegments,
 		),
 		fmt.Sprint(
-			snmp.FastKcpRestransmittedSegments,
+			snsi.FastKcpRestransmittedSegments,
 		),
 		fmt.Sprint(
-			snmp.EarlyKcpRestransmittedSegments,
+			snsi.EarlyKcpRestransmittedSegments,
 		),
 		fmt.Sprint(
-			snmp.LostSegments,
+			snsi.LostSegments,
 		),
 		fmt.Sprint(
-			snmp.DuplicateSegments,
+			snsi.DuplicateSegments,
 		),
 		fmt.Sprint(
-			snmp.KcpFECParityShards,
+			snsi.KcpFECParityShards,
 		),
 		fmt.Sprint(
-			snmp.KcpFailures,
+			snsi.KcpFailures,
 		),
 		fmt.Sprint(
-			snmp.KcpFECRecovered,
+			snsi.KcpFECRecovered,
 		),
 		fmt.Sprint(
-			snmp.KcpFECRuntShards,
+			snsi.KcpFECRuntShards,
 		),
 	}
 }
