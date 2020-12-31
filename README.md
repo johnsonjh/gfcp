@@ -2,6 +2,8 @@
 
 ## A high-speed implementation of the KCP transport for Go
 
+[![CodebeatBadge](https://codebeat.co/badges/43195211-7e9f-4454-a0ed-b2186946252b)](https://codebeat.co/projects/github-com-gridfinity-lkcp9-master)
+
 ### Availability
 
 #### Source Code
