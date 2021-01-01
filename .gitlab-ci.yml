@@ -69,7 +69,7 @@ windows job:
         echo "Build completed successfully - running tests; coverage and race detector enabled"
         echo "TODO: Port of full coverage tools to PowerShell"
     - $env:CGO_ENABLED="1"
-    - go test -v -cover -covermode="atomic" -race -count="1" -cpu="1" -bench="." -parallel="1" .\...
+    - go test -v -cover -covermode="atomic" -race -count="1" -cpu="2" -parallel="2" .\...
 ###################### End Windows Build + Test
 
 ###################### Begin Linux
@@ -105,7 +105,7 @@ linux job:
     - | 
         # status
         echo "Build completed successfully - running race-enabled testing."
-    - CGO_ENABLED=1 go test -v -a -cover -covermode=atomic -race -count=1 -cpu=1 -bench=. -parallel=1 $(go list ./... | grep -v test | sort | uniq)
+    - CGO_ENABLED=1 go test -v -a -cover -covermode=atomic -race -count=1 -cpu=2 -parallel=2 $(go list ./... | grep -v test | sort | uniq)
 ###################### End Linux Build + Test
 
 ###################### Begin macOS Build + Test
