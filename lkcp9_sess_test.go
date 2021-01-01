@@ -720,6 +720,10 @@ func TestClose(
 func TestMassivelyParallel_Concurrent_2048_Clients_128_byte_Messages_128_Iterations(
 	t *testing.T,
 ) {
+	if runtime.GOOS == "darwin" {
+		t.Log("Skipping stress test on OS X - runs out of files")
+		return
+	}
 	runtime.GC()
 	debug.FreeOSMemory()
 	t.Parallel()
