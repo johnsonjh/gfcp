@@ -133,12 +133,11 @@ macos job:
     - *scriptGoVersion
     - go clean -testcache -modcache -cache -r || true :;
     - *scriptGitPre
-    - ulimit -n unlimited ; ulimit -u unlimited ; ulimit -s unlimited
-    - GOMAXPROCS=128 CGO_ENABLED=0 go build -v -a -trimpath $(go list ./... | grep -v test | sort | uniq)
+    - GOMAXPROCS=8 CGO_ENABLED=0 go build -v -a -trimpath $(go list ./... | grep -v test | sort | uniq)
     - | 
         # status
         echo "Build completed successfully - running race-enabled tests."
-    - GOMAXPROCS=128 CGO_ENABLED=1 go test -v -a -cover -covermode=atomic -race -count=1 -cpu=2 -parallel=2 $(go list ./... | grep -v test | sort | uniq)
+    - GOMAXPROCS=8 CGO_ENABLED=1 go test -v -a -cover -covermode=atomic -race -count=1 -cpu=2 -parallel=2 $(go list ./... | grep -v test | sort | uniq)
     - | 
         # cleaning up
     - chmod -R u+rwx "${GOPATH:?}"/* 2>/dev/null && rm -rf -- "${GOPATH:?}"/* 2>/dev/null || true :;
