@@ -12,7 +12,7 @@
 [![CodacyBadge](https://api.codacy.com/project/badge/Grade/f777934d666b4a6a9672d89b404c4953)](https://app.codacy.com/gh/gridfinity/gfcp)
 [![LocCount](https://img.shields.io/tokei/lines/github/gridfinity/gfcp.svg)](https://github.com/XAMPPRocky/tokei)
 [![GitHubCodeSize](https://img.shields.io/github/languages/code-size/gridfinity/gfcp.svg)](https://github.com/gridfinity/gfcp)
-[![GitHubRelease](https://img.shields.io/github/gridfinity/gfcp.svg)](https://github.com/gridfinity/gfcp/releases/)
+[![GitHubRelease](https://img.shields.io/github/v/release/gridfinity/gfcp.svg)](https://github.com/gridfinity/gfcp/releases/)
 [![DeepSourceActive](https://deepsource.io/gh/gridfinity/gfcp.svg/?label=active+issues)](https://deepsource.io/gh/gridfinity/gfcp/?ref=repository-badge)
 [![TickgitTODOs](https://img.shields.io/endpoint?url=https://api.tickgit.com/badge?repo=github.com/gridfinity/gfcp)](https://www.tickgit.com/browse?repo=github.com/gridfinity/gfcp)
 
