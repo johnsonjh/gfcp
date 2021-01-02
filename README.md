@@ -9,14 +9,12 @@
 [![LicenseMIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/gridfinity/gfcp/blob/master/LICENSE)
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/gridfinity/gfcp)](https://pkg.go.dev/github.com/gridfinity/gfcp)
 [![GoReportCard](https://goreportcard.com/badge/github.com/gridfinity/gfcp)](https://goreportcard.com/report/github.com/gridfinity/gfcp)
-[![CodebeatBadge](https://codebeat.co/badges/43195211-7e9f-4454-a0ed-b2186946252b)](https://codebeat.co/projects/github-com-gridfinity-gfcp-master)
 [![CodacyBadge](https://api.codacy.com/project/badge/Grade/f777934d666b4a6a9672d89b404c4953)](https://app.codacy.com/gh/gridfinity/gfcp)
 [![LocCount](https://img.shields.io/tokei/lines/github/gridfinity/gfcp.svg)](https://github.com/XAMPPRocky/tokei)
 [![GitHubCodeSize](https://img.shields.io/github/languages/code-size/gridfinity/gfcp.svg)](https://github.com/gridfinity/gfcp)
 [![GitHubRelease](https://img.shields.io/github/gridfinity/gfcp.svg)](https://github.com/gridfinity/gfcp/releases/)
 [![DeepScanGrade](https://deepscan.io/api/teams/12186/projects/15317/branches/304602/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=12186&pid=15317&bid=304602)
 [![DeepSourceActive](https://deepsource.io/gh/gridfinity/gfcp.svg/?label=active+issues)](https://deepsource.io/gh/gridfinity/gfcp/?ref=repository-badge)
-[![DeepSourceResolved](https://deepsource.io/gh/gridfinity/gfcp.svg/?label=resolved+issues)](https://deepsource.io/gh/gridfinity/gfcp/?ref=repository-badge)
 [![TickgitTODOs](https://img.shields.io/endpoint?url=https://api.tickgit.com/badge?repo=github.com/gridfinity/gfcp)](https://www.tickgit.com/browse?repo=github.com/gridfinity/gfcp)
 
 ---
