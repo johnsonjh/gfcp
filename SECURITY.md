@@ -2,11 +2,11 @@
 
 ## Supported releases
 
-* Only the most recent current release is ***SUPPORTED***.**☨**
+- Only the most recent current release is **_SUPPORTED_**.**☨**
 
-    [![GitHubRelease](https://img.shields.io/github/release/gridfinity/gfcp.svg)](https://github.com/gridfinity/gfcp/releases/)
+  [![GitHubRelease](https://img.shields.io/github/release/gridfinity/gfcp.svg)](https://github.com/gridfinity/gfcp/releases/)
 
-* **☨** Support is offered on a **best-effort** basis **ONLY**.
+- **☨** Support is offered on a **best-effort** basis **ONLY**.
 
 ```text
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
@@ -19,14 +19,15 @@ OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE
 SOFTWARE, OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-* Pre-release versions and past releases are ***NOT SUPPORTED***.
+- Pre-release versions and past releases are **_NOT SUPPORTED_**.
 
 ## Report a security vulnerability
 
-* Create a new issue at [Gridfinity GitLab](https://gitlab.gridfinity.com/gridfinity/gfcp/-/issues)
-  * Check "*This issue is confidential and should only be visible to team members with at least Reporter access.*"
+- Create a new issue at [Gridfinity GitLab](https://gitlab.gridfinity.com/gridfinity/gfcp/-/issues)
 
-  * Or, send a **PGP-encrypted** email to <mailto:jeff@gridfinity.com>
+  - Check "_This issue is confidential and should only be visible to team members with at least Reporter access._"
+
+  - Or, send a **PGP-encrypted** email to <mailto:jeff@gridfinity.com>
 
 ```text
 -----BEGIN PGP PUBLIC KEY BLOCK-----
@@ -82,4 +83,3 @@ cDxxVx9gHNya+1Bkx+piAg==
 =JIQ0
 -----END PGP PUBLIC KEY BLOCK-----
 ```
-
