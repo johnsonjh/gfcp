@@ -4,7 +4,7 @@
 
 ### A high-speed variant of the KCP ARQ transport for Go
 
-------------------------
+---
 
 [![LicenseMIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/gridfinity/gfcp/blob/master/LICENSE)
 [![GoVersion](https://img.shields.io/github/gridfinity/gfcp.svg)](https://github.com/gridfinity/gfcp/blob/master/go.mod)
@@ -19,20 +19,20 @@
 [![DeepSource](https://deepsource.io/gh/gridfinity/gfcp.svg/?label=resolved+issues)](https://deepsource.io/gh/gridfinity/gfcp/?ref=repository-badge)
 [![TickgitTODOs](https://img.shields.io/endpoint?url=https://api.tickgit.com/badge?repo=github.com/gridfinity/gfcp)](https://www.tickgit.com/browse?repo=github.com/gridfinity/gfcp)
 
-------------------------
+---
 
 ### Availability
 
 #### Go Modules
 
-* [go.gridfinity.dev](https://go.gridfinity.dev/gfcp)
-* [go.gridfinity.com](https://go.gridfinity.com)
+- [go.gridfinity.dev](https://go.gridfinity.dev/gfcp)
+- [go.gridfinity.com](https://go.gridfinity.com)
 
 #### Source Code
 
-* [Gridfinity GitHub](https://gitlab.gridfinity.com/go/gfcp)
-* [SourceHut](https://sr.ht/~trn/gfcp)
-* [GitHub](https://github.com/gridfinity/gfcp)
+- [Gridfinity GitHub](https://gitlab.gridfinity.com/go/gfcp)
+- [SourceHut](https://sr.ht/~trn/gfcp)
+- [GitHub](https://github.com/gridfinity/gfcp)
 
 ### Documentation
 
@@ -41,18 +41,19 @@
 
 ### Issue Tracking
 
-* [Gridfinity GitLab Issues](https://gitlab.gridfinity.com/go/gfcp/-/issues)
+- [Gridfinity GitLab Issues](https://gitlab.gridfinity.com/go/gfcp/-/issues)
 
 ### Security Policy
 
-* [Security Policy and Vulnerability Reporting](https://gitlab.gridfinity.com/go/gfcp/-/blob/master/SECURITY.md)
+- [Security Policy and Vulnerability Reporting](https://gitlab.gridfinity.com/go/gfcp/-/blob/master/SECURITY.md)
 
 ### Original Authors
 
-* [Daniel 'Xtaci' Fu](https://github.com/xtaci)  [\<daniel820313@gmail.com\>](mailto:imap@live.com)
-* [Loki 'l0k18' Verloren](https://github.com/l0k18)  [\<stalker.loki@protonmail.ch\>](mailto:stalker.loki@protonmail.ch)
+- [Daniel 'Xtaci' Fu](https://github.com/xtaci)
+  [\<daniel820313@gmail.com\>](mailto:imap@live.com)
+- [Loki 'l0k18' Verloren](https://github.com/l0k18)
+  [\<stalker.loki@protonmail.ch\>](mailto:stalker.loki@protonmail.ch)
 
 ### License
 
-* [The MIT License](https://gitlab.gridfinity.com/go/gfcp/-/blob/master/LICENSE)
-
+- [The MIT License](https://gitlab.gridfinity.com/go/gfcp/-/blob/master/LICENSE)
