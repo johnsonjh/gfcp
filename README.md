@@ -2,19 +2,20 @@
 
 ## Gridfinity Control Protocol
 
-### A high-speed variant of the KCP transport for Go
+### A high-speed variant of the KCP ARQ transport for Go
 
+------------------------
+
+[![LicenseMIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/gridfinity/gfcp/blob/master/LICENSE)
 [![GoVersion](https://img.shields.io/github/gridfinity/gfcp.svg)](https://github.com/gridfinity/gfcp/blob/master/go.mod)
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/gridfinity/gfcp)](https://pkg.go.dev/github.com/gridfinity/gfcp)
 [![GoReportCard](https://goreportcard.com/badge/github.com/gridfinity/gfcp)](https://goreportcard.com/report/github.com/gridfinity/gfcp)
 [![CodebeatBadge](https://codebeat.co/badges/43195211-7e9f-4454-a0ed-b2186946252b)](https://codebeat.co/projects/github-com-gridfinity-gfcp-master)
 [![CodacyBadge](https://api.codacy.com/project/badge/Grade/f777934d666b4a6a9672d89b404c4953)](https://app.codacy.com/gh/gridfinity/gfcp)
-[![LicenseMIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/gridfinity/gfcp/blob/master/LICENSE)
 [![LocCount](https://img.shields.io/tokei/lines/github/gridfinity/gfcp.svg)](https://github.com/XAMPPRocky/tokei)
 [![GitHubCodeSize](https://img.shields.io/github/languages/code-size/gridfinity/gfcp.svg)](https://github.com/gridfinity/gfcp)
 [![GitHubRelease](https://img.shields.io/github/gridfinity/gfcp.svg)](https://github.com/gridfinity/gfcp/releases/)
-[![LgtmAlerts](https://img.shields.io/lgtm/alerts/g/gridfinity/gfcp.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/gridfinity/gfcp/alerts/)
-[![DeepScanGrade](https://deepscan.io/api/teams/12184/projects/15170/branches/299583/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=12184&pid=15170&bid=299583)
+[![DeepScanGrade](https://deepscan.io/api/teams/12186/projects/15317/branches/304602/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=12186&pid=15317&bid=304602)
 [![DeepSource](https://deepsource.io/gh/gridfinity/gfcp.svg/?label=resolved+issues)](https://deepsource.io/gh/gridfinity/gfcp/?ref=repository-badge)
 [![TickgitTODOs](https://img.shields.io/endpoint?url=https://api.tickgit.com/badge?repo=github.com/gridfinity/gfcp)](https://www.tickgit.com/browse?repo=github.com/gridfinity/gfcp)
 
