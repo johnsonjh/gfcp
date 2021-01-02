@@ -38,7 +38,7 @@ func TestGoEnvironment(
 	)
 }
 
-func Testlkcp9License(
+func TestLKcp9License(
 	t *testing.T,
 ) {
 	defer u.Leakplug(
@@ -49,7 +49,7 @@ func Testlkcp9License(
 		licenses,
 	) == 0 {
 		t.Fatal(
-			"\nlkcp9_license_test.TestLicense.licenses FAILURE:",
+			"\nlkcp9_license_test.TestLKcp9License FAILURE:",
 		)
 	} else {
 		t.Log(

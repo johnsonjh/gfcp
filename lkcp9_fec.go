@@ -20,10 +20,13 @@ import (
 const (
 	fecHeaderSize      = 6
 	fecHeaderSizePlus2 = fecHeaderSize + 2
-	KTypeData          = 0xf1
-	KTypeParity        = 0xf2
+	// KTypeData ...
+	KTypeData = 0xf1
+	// KTypeParity ...
+	KTypeParity = 0xf2
 )
 
+// FecPacket ...
 type FecPacket []byte
 
 func (
@@ -46,6 +49,7 @@ func (bts FecPacket) data() []byte {
 	return bts[6:]
 }
 
+// FecDecoder ...
 type FecDecoder struct {
 	rxlimit      int
 	dataShards   int
@@ -58,6 +62,7 @@ type FecDecoder struct {
 	codec        reedsolomon.Encoder
 }
 
+// KcpNewDECDecoder ...
 func KcpNewDECDecoder(
 	rxlimit,
 	dataShards,
@@ -100,6 +105,7 @@ func KcpNewDECDecoder(
 	return dec
 }
 
+// Decode ...
 func (dec *FecDecoder) Decode(in FecPacket) (recovered [][]byte) {
 	n := len(dec.rx) - 1
 	insertIdx := 0
@@ -200,6 +206,7 @@ func (dec *FecDecoder) Decode(in FecPacket) (recovered [][]byte) {
 
 func (dec *FecDecoder) freeRange(first, n int, q []FecPacket) []FecPacket {
 	for i := first; i < first+n; i++ {
+		// TODO(jhj): Switch to pointer to avoid allocation.
 		KxmitBuf.Put([]byte(q[i]))
 	}
 
@@ -211,6 +218,7 @@ func (dec *FecDecoder) freeRange(first, n int, q []FecPacket) []FecPacket {
 }
 
 type (
+	// FecEncoder ...
 	FecEncoder struct {
 		dataShards    int
 		parityShards  int
@@ -228,6 +236,7 @@ type (
 	}
 )
 
+// KcpNewDECEncoder ...
 func KcpNewDECEncoder(dataShards, parityShards, offset int) *FecEncoder {
 	if dataShards <= 0 || parityShards <= 0 {
 		return nil
@@ -270,6 +279,7 @@ func KcpNewDECEncoder(dataShards, parityShards, offset int) *FecEncoder {
 	return enc
 }
 
+// Encode ...
 func (
 	enc *FecEncoder,
 ) Encode(

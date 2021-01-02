@@ -13,6 +13,7 @@ package lkcp9 // import "go.gridfinity.dev/lkcp9"
 import (
 	"crypto/rand"
 	"encoding/binary"
+	"fmt"
 	"hash/crc32"
 	"net"
 	"sync"
@@ -50,9 +51,10 @@ const (
 	nonceSize       = 16
 	crcSize         = 4
 	cryptHeaderSize = nonceSize + crcSize
-	KcpMtuLimit     = 1500
-	rxFECMulti      = 3
-	acceptBacklog   = 128
+	// KcpMtuLimit ...
+	KcpMtuLimit   = 1500
+	rxFECMulti    = 3
+	acceptBacklog = 128
 )
 
 const (
@@ -60,6 +62,7 @@ const (
 	errInvalidOperation = "invalid operation"
 )
 
+// KxmitBuf ...
 var KxmitBuf sync.Pool
 
 func init() {
@@ -72,15 +75,18 @@ func init() {
 }
 
 type (
+	// UDPSession ...
 	UDPSession struct {
-		updaterIdx   int            // record slice index in updater
-		conn         net.PacketConn // the underlying packet connection
-		Kcp          *KCP           // KCP ARQ protocol
-		l            *Listener      // pointing to the Listener object if it's been accepted by a Listener
-		block        BlockCrypt     // block encryption object
-		recvbuf      []byte
-		bufptr       []byte
-		FecDecoder   *FecDecoder
+		updaterIdx int            // record slice index in updater
+		conn       net.PacketConn // the underlying packet connection
+		Kcp        *KCP           // KCP ARQ protocol
+		l          *Listener      // pointing to the Listener object if it's been accepted by a Listener
+		block      BlockCrypt     // block encryption object
+		recvbuf    []byte
+		bufptr     []byte
+		// FecDecoder ...
+		FecDecoder *FecDecoder
+		// FecEncoder ...
 		FecEncoder   *FecEncoder
 		remote       net.Addr      // remote peer address
 		rd           time.Time     // read deadline
@@ -184,7 +190,7 @@ func newUDPSession(
 		buf []byte,
 		size int,
 	) {
-		if size >= IKCP_OVERHEAD+sess.headerSize {
+		if size >= IKcpOverhead+sess.headerSize {
 			sess.output(
 				buf[:size],
 			)
@@ -264,11 +270,17 @@ func (
 					b,
 				)
 				s.mu.Unlock()
-				atomic.AddUint64(&DefaultSnsi.KcpBytesReceived, uint64(size))
+				atomic.AddUint64(
+					&DefaultSnsi.KcpBytesReceived,
+					uint64(size),
+				)
 				return size, nil
 			}
 			if cap(s.recvbuf) < size {
-				s.recvbuf = make([]byte, size)
+				s.recvbuf = make(
+					[]byte,
+					size,
+				)
 			}
 			s.recvbuf = s.recvbuf[:size]
 			s.Kcp.Recv(
@@ -295,8 +307,8 @@ func (
 				s.mu.Unlock()
 				return 0, errTimeout{}
 			}
-			delay := s.rd.Sub(
-				time.Now(),
+			delay := time.Until(
+				s.rd,
 			)
 			timeout = time.NewTimer(
 				delay,
@@ -334,6 +346,7 @@ func (
 	)
 }
 
+// WriteBuffers ...
 func (
 	s *UDPSession,
 ) WriteBuffers(
@@ -353,7 +366,7 @@ func (
 		}
 
 		if s.Kcp.WaitSnd() < int(
-			s.Kcp.snd_wnd,
+			s.Kcp.sndWnd,
 		) {
 			for _, b := range v {
 				n += len(
@@ -368,16 +381,15 @@ func (
 							b,
 						)
 						break
-					} else {
-						s.Kcp.Send(
-							b[:s.Kcp.mss],
-						)
-						b = b[s.Kcp.mss:]
 					}
+					s.Kcp.Send(
+						b[:s.Kcp.mss],
+					)
+					b = b[s.Kcp.mss:]
 				}
 			}
 
-			if s.Kcp.WaitSnd() >= int(s.Kcp.snd_wnd) || !s.writeDelay {
+			if s.Kcp.WaitSnd() >= int(s.Kcp.sndWnd) || !s.writeDelay {
 				s.Kcp.Flush(
 					false,
 				)
@@ -393,12 +405,18 @@ func (
 		var timeout *time.Timer
 		var c <-chan time.Time
 		if !s.wd.IsZero() {
-			if time.Now().After(s.wd) {
+			if time.Now().After(
+				s.wd,
+			) {
 				s.mu.Unlock()
 				return 0, errTimeout{}
 			}
-			delay := s.wd.Sub(time.Now())
-			timeout = time.NewTimer(delay)
+			delay := time.Until(
+				s.wd,
+			)
+			timeout = time.NewTimer(
+				delay,
+			)
 			c = timeout.C
 		}
 		s.mu.Unlock()
@@ -420,10 +438,13 @@ func (
 	}
 }
 
+// Close ...
 func (
 	s *UDPSession,
 ) Close() error {
-	updater.removeSession(s)
+	updater.removeSession(
+		s,
+	)
 	if s.l != nil {
 		s.l.CloseSession(
 			s.remote,
@@ -624,14 +645,17 @@ func (
 				nc.LocalAddr().String(),
 			)
 			if addr.IP.To4() != nil {
-				return ipv4.NewConn(nc).SetTOS(
+				return ipv4.NewConn(
+					nc,
+				).SetTOS(
 					dscp << 2,
 				)
-			} else {
-				return ipv6.NewConn(nc).SetTrafficClass(
-					dscp,
-				)
 			}
+			return ipv6.NewConn(
+				nc,
+			).SetTrafficClass(
+				dscp,
+			)
 		}
 	}
 	return errors.New(
@@ -708,7 +732,9 @@ func (
 			buf,
 		)
 		for k := range ecc {
-			s.nonce.Fill(ecc[k][:nonceSize])
+			s.nonce.Fill(
+				ecc[k][:nonceSize],
+			)
 			checksum := crc32.ChecksumIEEE(
 				ecc[k][cryptHeaderSize:],
 			)
@@ -716,7 +742,8 @@ func (
 				ecc[k][nonceSize:],
 				checksum,
 			)
-			s.block.Encrypt(ecc[k],
+			s.block.Encrypt(
+				ecc[k],
 				ecc[k],
 			)
 		}
@@ -775,6 +802,7 @@ func (
 	return
 }
 
+// GetConv ...
 func (
 	s *UDPSession,
 ) GetConv() uint32 {
@@ -845,6 +873,7 @@ func (
 	}
 }
 
+// KcpInput ...
 func (
 	s *UDPSession,
 ) KcpInput(
@@ -906,6 +935,7 @@ func (
 					} else {
 						fecErrs++
 					}
+					// TODO(jhj): Switch to pointer to avoid allocation.
 					KxmitBuf.Put(
 						r,
 					)
@@ -983,10 +1013,12 @@ func (
 }
 
 type (
+	// Listener ...
 	Listener struct {
-		block           BlockCrypt             // block encryption
-		dataShards      int                    // FEC data shard
-		parityShards    int                    // FEC parity shard
+		block        BlockCrypt // block encryption
+		dataShards   int        // FEC data shard
+		parityShards int        // FEC parity shard
+		/// FecDecoder ...
 		FecDecoder      *FecDecoder            // FEC mock initialization
 		conn            net.PacketConn         // the underlying packet connection
 		sessions        map[string]*UDPSession // all sessions accepted by this Listener
@@ -1135,13 +1167,12 @@ func (
 			).SetTOS(
 				dscp << 2,
 			)
-		} else {
-			return ipv6.NewConn(
-				nc,
-			).SetTrafficClass(
-				dscp,
-			)
 		}
+		return ipv6.NewConn(
+			nc,
+		).SetTrafficClass(
+			dscp,
+		)
 	}
 	return errors.New(
 		errInvalidOperation,
@@ -1168,10 +1199,7 @@ func (
 ) {
 	var timeout <-chan time.Time
 	if tdeadline, ok := l.rd.Load().(time.Time); ok && !tdeadline.IsZero() {
-		timeout = time.After(
-			tdeadline.Sub(
-				time.Now(),
-			))
+		timeout = time.After(time.Since(tdeadline))
 	}
 
 	select {
@@ -1193,12 +1221,29 @@ func (
 ) SetDeadline(
 	t time.Time,
 ) error {
-	l.SetReadDeadline(
+	var err error
+	err = l.SetReadDeadline(
 		t,
 	)
-	l.SetWriteDeadline(
+	if err != nil {
+		panic(
+			fmt.Sprintf(
+				"SetReadDeadLine failure: %v",
+				err,
+			),
+		)
+	}
+	err = l.SetWriteDeadline(
 		t,
 	)
+	if err != nil {
+		panic(
+			fmt.Sprintf(
+				"SetWriteDeadline failure: %v",
+				err,
+			),
+		)
+	}
 	return nil
 }
 
@@ -1437,11 +1482,14 @@ func NewConn(
 		)
 	}
 	var convid uint32
-	binary.Read(
+	err = binary.Read(
 		rand.Reader,
 		binary.LittleEndian,
 		&convid,
 	)
+	if err != nil {
+		panic("binary.Read failure")
+	}
 	return newUDPSession(
 		convid,
 		dataShards,
@@ -1453,8 +1501,9 @@ func NewConn(
 	), nil
 }
 
-var refTime time.Time = time.Now()
+var refTime = time.Now()
 
+// KcpCurrentMs ...
 func KcpCurrentMs() uint32 {
-	return uint32(time.Now().Sub(refTime) / time.Millisecond)
+	return uint32(time.Since(refTime) / time.Millisecond)
 }

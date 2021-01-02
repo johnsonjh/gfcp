@@ -9,7 +9,6 @@
 //
 // All use of this code is governed by the MIT license.
 // The complete license is available in the LICENSE file.
-
 package lkcp9 // import "go.gridfinity.dev/lkcp9"
 
 import (
@@ -19,36 +18,37 @@ import (
 	lkcp9Legal "go4.org/legal"
 )
 
+// IKcp9 protocol constants
 const (
-	IKCP_RTO_NDL     = 30  // no delay min rto
-	IKCP_RTO_MIN     = 100 // normal min rto
-	IKCP_RTO_DEF     = 200
-	IKCP_RTO_MAX     = 60000
-	IKCP_CMD_PUSH    = 81 // cmd: push data
-	IKCP_CMD_ACK     = 82 // cmd: ack
-	IKCP_CMD_WASK    = 83 // cmd: window probe (ask)
-	IKCP_CMD_WINS    = 84 // cmd: window size (tell)
-	IKCP_ASK_SEND    = 1  // need to send IKCP_CMD_WASK
-	IKCP_ASK_TELL    = 2  // need to send IKCP_CMD_WINS
-	IKCP_WND_SND     = 32
-	IKCP_WND_RCV     = 32
-	IKCP_MTU_DEF     = 1400
-	IKCP_ACK_FAST    = 3
-	IKCP_INTERVAL    = 100
-	IKCP_OVERHEAD    = 24
-	IKCP_DEADLINK    = 20
-	IKCP_THRESH_INIT = 2
-	IKCP_THRESH_MIN  = 2
-	IKCP_PROBE_INIT  = 7000   // 7 secs to probe window size
-	IKCP_PROBE_LIMIT = 120000 // up to 120 secs to probe window
+	IKcpRtoNdl     = 30  // IKcpRtoNdl:	NoDelay min RTO
+	IKcpRtoMin     = 100 // IKcpRtoMin:	Regular min RTO
+	IKcpRtoDef     = 200
+	IKcpRtoMax     = 60000
+	IKcpCmdPush    = 81 // IKcpCmdPush:	Push data
+	IKcpCmdAck     = 82 // IKcpCmdAck:	Ack
+	IKcpCmdWask    = 83 // IKcpCmdWask:	Get Window Size
+	IKcpCmdWins    = 84 // IKcpCmdWins:	Set window Size
+	IKcpAskSend    = 1  // IKcpAskSend:	need to send IKcpCmdWask
+	IKcpAskTell    = 2  // IKcpAskTell:	need to send IKcpCmdWins
+	IKcpWndSnd     = 32
+	IKcpWndRcv     = 32
+	IKcpMtuDef     = 1400
+	IKcpAckFast    = 3
+	IKcpInterval   = 100
+	IKcpOverhead   = 24
+	IKcpDeadLink   = 20
+	IKcpThreshInit = 2
+	IKcpThreshMin  = 2
+	IKcpProbeInit  = 7000   // 7s initial probe window
+	IKcpProbeLimit = 120000 // 120s hard probe timeout
 )
 
-type output_callback func(
+type outputCallback func(
 	buf []byte,
 	size int,
 )
 
-func iKcp_encode8u(
+func iKcpEncode8u(
 	p []byte,
 	c byte,
 ) []byte {
@@ -56,7 +56,7 @@ func iKcp_encode8u(
 	return p[1:]
 }
 
-func iKcp_decode8u(
+func iKcpDecode8u(
 	p []byte,
 	c *byte,
 ) []byte {
@@ -64,7 +64,7 @@ func iKcp_decode8u(
 	return p[1:]
 }
 
-func iKcp_encode16u(
+func iKcpEncode16u(
 	p []byte,
 	w uint16,
 ) []byte {
@@ -75,7 +75,7 @@ func iKcp_encode16u(
 	return p[2:]
 }
 
-func iKcp_decode16u(
+func iKcpDecode16u(
 	p []byte,
 	w *uint16,
 ) []byte {
@@ -85,7 +85,7 @@ func iKcp_decode16u(
 	return p[2:]
 }
 
-func iKcp_encode32u(
+func iKcpEncode32u(
 	p []byte,
 	l uint32,
 ) []byte {
@@ -96,7 +96,7 @@ func iKcp_encode32u(
 	return p[4:]
 }
 
-func iKcp_decode32u(
+func iKcpDecode32u(
 	p []byte,
 	l *uint32,
 ) []byte {
@@ -106,7 +106,7 @@ func iKcp_decode32u(
 	return p[4:]
 }
 
-func _imin_(
+func _imin(
 	a,
 	b uint32,
 ) uint32 {
@@ -116,7 +116,7 @@ func _imin_(
 	return b
 }
 
-func _imax_(
+func _imax(
 	a,
 	b uint32,
 ) uint32 {
@@ -126,13 +126,13 @@ func _imax_(
 	return b
 }
 
-func _ibound_(
+func _ibound(
 	lower,
 	middle,
 	upper uint32,
 ) uint32 {
-	return _imin_(
-		_imax_(
+	return _imin(
+		_imax(
 			lower,
 			middle,
 		),
@@ -147,6 +147,7 @@ func _itimediff(
 	return (int32)(later - earlier)
 }
 
+// KcpSegment structure
 type KcpSegment struct {
 	conv        uint32
 	cmd         uint8
@@ -168,35 +169,35 @@ func (
 ) encode(
 	ptr []byte,
 ) []byte {
-	ptr = iKcp_encode32u(
+	ptr = iKcpEncode32u(
 		ptr,
 		KcpSeg.conv,
 	)
-	ptr = iKcp_encode8u(
+	ptr = iKcpEncode8u(
 		ptr,
 		KcpSeg.cmd,
 	)
-	ptr = iKcp_encode8u(
+	ptr = iKcpEncode8u(
 		ptr,
 		KcpSeg.frg,
 	)
-	ptr = iKcp_encode16u(
+	ptr = iKcpEncode16u(
 		ptr,
 		KcpSeg.wnd,
 	)
-	ptr = iKcp_encode32u(
+	ptr = iKcpEncode32u(
 		ptr,
 		KcpSeg.ts,
 	)
-	ptr = iKcp_encode32u(
+	ptr = iKcpEncode32u(
 		ptr,
 		KcpSeg.sn,
 	)
-	ptr = iKcp_encode32u(
+	ptr = iKcpEncode32u(
 		ptr,
 		KcpSeg.una,
 	)
-	ptr = iKcp_encode32u(
+	ptr = iKcpEncode32u(
 		ptr, uint32(len(
 			KcpSeg.data,
 		)))
@@ -207,27 +208,28 @@ func (
 	return ptr
 }
 
+// KCP primary structure
 type KCP struct {
-	conv, mtu, mss, state                  uint32
-	snd_una, snd_nxt, rcv_nxt              uint32
-	ssthresh                               uint32
-	rx_rttvar, rx_srtt                     int32
-	rx_rto, rx_minrto                      uint32
-	snd_wnd, rcv_wnd, rmt_wnd, cwnd, probe uint32
-	interval, ts_Flush                     uint32
-	nodelay, updated                       uint32
-	ts_probe, probe_wait                   uint32
-	dead_link, incr                        uint32
-	fastresend                             int32
-	nocwnd, stream                         int32
-	snd_queue                              []KcpSegment
-	rcv_queue                              []KcpSegment
-	SndBuf                                 []KcpSegment
-	rcv_buf                                []KcpSegment
-	acklist                                []ackItem
-	buffer                                 []byte
-	reserved                               int
-	output                                 output_callback
+	conv, mtu, mss, state               uint32
+	sndUna, sndNxt, rcvNxt              uint32
+	ssthresh                            uint32
+	rxRttVar, rxSrtt                    int32
+	rxRto, rxMinRto                     uint32
+	sndWnd, rcvWnd, rmtWnd, cwnd, probe uint32
+	interval, tsFlush                   uint32
+	nodelay, updated                    uint32
+	tsProbe, probeWait                  uint32
+	deadLink, incr                      uint32
+	fastresend                          int32
+	nocwnd, stream                      int32
+	sndQueue                            []KcpSegment
+	rcvQueue                            []KcpSegment
+	SndBuf                              []KcpSegment
+	rcvBuf                              []KcpSegment
+	acklist                             []ackItem
+	buffer                              []byte
+	reserved                            int
+	output                              outputCallback
 }
 
 type ackItem struct {
@@ -238,27 +240,27 @@ type ackItem struct {
 // NewKCP creates a new Kcp control object.
 func NewKCP(
 	conv uint32,
-	output output_callback,
+	output outputCallback,
 ) *KCP {
 	Kcp := new(
 		KCP,
 	)
 	Kcp.conv = conv
-	Kcp.snd_wnd = IKCP_WND_SND
-	Kcp.rcv_wnd = IKCP_WND_RCV
-	Kcp.rmt_wnd = IKCP_WND_RCV
-	Kcp.mtu = IKCP_MTU_DEF
-	Kcp.mss = Kcp.mtu - IKCP_OVERHEAD
+	Kcp.sndWnd = IKcpWndSnd
+	Kcp.rcvWnd = IKcpWndRcv
+	Kcp.rmtWnd = IKcpWndRcv
+	Kcp.mtu = IKcpMtuDef
+	Kcp.mss = Kcp.mtu - IKcpOverhead
 	Kcp.buffer = make(
 		[]byte,
 		Kcp.mtu,
 	)
-	Kcp.rx_rto = IKCP_RTO_DEF
-	Kcp.rx_minrto = IKCP_RTO_MIN
-	Kcp.interval = IKCP_INTERVAL
-	Kcp.ts_Flush = IKCP_INTERVAL
-	Kcp.ssthresh = IKCP_THRESH_INIT
-	Kcp.dead_link = IKCP_DEADLINK
+	Kcp.rxRto = IKcpRtoDef
+	Kcp.rxMinRto = IKcpRtoMin
+	Kcp.interval = IKcpInterval
+	Kcp.tsFlush = IKcpInterval
+	Kcp.ssthresh = IKcpThreshInit
+	Kcp.deadLink = IKcpDeadLink
 	Kcp.output = output
 	return Kcp
 }
@@ -279,6 +281,7 @@ func (Kcp *KCP) delSegment(
 ) {
 	if KcpSeg.data != nil {
 		KxmitBuf.Put(
+			// TODO(jhj): Switch to pointer to avoid allocation
 			KcpSeg.data,
 		)
 		KcpSeg.data = nil
@@ -293,12 +296,12 @@ func (
 	n int,
 ) bool {
 	if n >= int(
-		Kcp.mtu-IKCP_OVERHEAD,
+		Kcp.mtu-IKcpOverhead,
 	) || n < 0 {
 		return false
 	}
 	Kcp.reserved = n
-	Kcp.mss = Kcp.mtu - IKCP_OVERHEAD - uint32(
+	Kcp.mss = Kcp.mtu - IKcpOverhead - uint32(
 		n,
 	)
 	return true
@@ -311,23 +314,23 @@ func (
 	length int,
 ) {
 	if len(
-		Kcp.rcv_queue,
+		Kcp.rcvQueue,
 	) == 0 {
 		return -1
 	}
-	KcpSeg := &Kcp.rcv_queue[0]
+	KcpSeg := &Kcp.rcvQueue[0]
 	if KcpSeg.frg == 0 {
 		return len(
 			KcpSeg.data,
 		)
 	}
 	if len(
-		Kcp.rcv_queue,
+		Kcp.rcvQueue,
 	) < int(KcpSeg.frg+1) {
 		return -1
 	}
-	for k := range Kcp.rcv_queue {
-		KcpSeg := &Kcp.rcv_queue[k]
+	for k := range Kcp.rcvQueue {
+		KcpSeg := &Kcp.rcvQueue[k]
 		length += len(
 			KcpSeg.data,
 		)
@@ -347,7 +350,7 @@ func (
 	n int,
 ) {
 	if len(
-		Kcp.rcv_queue,
+		Kcp.rcvQueue,
 	) == 0 {
 		return -1
 	}
@@ -360,17 +363,17 @@ func (
 	) {
 		return -3
 	}
-	var fast_recover bool
+	var fastRecovery bool
 	if len(
-		Kcp.rcv_queue,
+		Kcp.rcvQueue,
 	) >= int(
-		Kcp.rcv_wnd,
+		Kcp.rcvWnd,
 	) {
-		fast_recover = true
+		fastRecovery = true
 	}
 	count := 0
-	for k := range Kcp.rcv_queue {
-		KcpSeg := &Kcp.rcv_queue[k]
+	for k := range Kcp.rcvQueue {
+		KcpSeg := &Kcp.rcvQueue[k]
 		copy(
 			buffer,
 			KcpSeg.data,
@@ -388,37 +391,37 @@ func (
 		}
 	}
 	if count > 0 {
-		Kcp.rcv_queue = Kcp.remove_front(
-			Kcp.rcv_queue,
+		Kcp.rcvQueue = Kcp.removeFront(
+			Kcp.rcvQueue,
 			count,
 		)
 	}
 	count = 0
-	for k := range Kcp.rcv_buf {
-		KcpSeg := &Kcp.rcv_buf[k]
-		if KcpSeg.sn == Kcp.rcv_nxt && len(
-			Kcp.rcv_queue,
-		) < int(Kcp.rcv_wnd) {
-			Kcp.rcv_nxt++
+	for k := range Kcp.rcvBuf {
+		KcpSeg := &Kcp.rcvBuf[k]
+		if KcpSeg.sn == Kcp.rcvNxt && len(
+			Kcp.rcvQueue,
+		) < int(Kcp.rcvWnd) {
+			Kcp.rcvNxt++
 			count++
 		} else {
 			break
 		}
 	}
 	if count > 0 {
-		Kcp.rcv_queue = append(
-			Kcp.rcv_queue,
-			Kcp.rcv_buf[:count]...,
+		Kcp.rcvQueue = append(
+			Kcp.rcvQueue,
+			Kcp.rcvBuf[:count]...,
 		)
-		Kcp.rcv_buf = Kcp.remove_front(
-			Kcp.rcv_buf,
+		Kcp.rcvBuf = Kcp.removeFront(
+			Kcp.rcvBuf,
 			count,
 		)
 	}
 	if len(
-		Kcp.rcv_queue,
-	) < int(Kcp.rcv_wnd) && fast_recover {
-		Kcp.probe |= IKCP_ASK_TELL
+		Kcp.rcvQueue,
+	) < int(Kcp.rcvWnd) && fastRecovery {
+		Kcp.probe |= IKcpAskTell
 	}
 	return
 }
@@ -437,10 +440,10 @@ func (
 	}
 	if Kcp.stream != 0 {
 		n := len(
-			Kcp.snd_queue,
+			Kcp.sndQueue,
 		)
 		if n > 0 {
-			KcpSeg := &Kcp.snd_queue[n-1]
+			KcpSeg := &Kcp.sndQueue[n-1]
 			if len(KcpSeg.data) < int(Kcp.mss) {
 				capacity := int(Kcp.mss) - len(
 					KcpSeg.data,
@@ -507,8 +510,8 @@ func (
 		} else {
 			KcpSeg.frg = 0
 		}
-		Kcp.snd_queue = append(
-			Kcp.snd_queue,
+		Kcp.sndQueue = append(
+			Kcp.sndQueue,
 			KcpSeg,
 		)
 		buffer = buffer[size:]
@@ -518,61 +521,61 @@ func (
 
 func (
 	Kcp *KCP,
-) update_ack(
+) updateAck(
 	rtt int32,
 ) {
 	var rto uint32
-	if Kcp.rx_srtt == 0 {
-		Kcp.rx_srtt = rtt
-		Kcp.rx_rttvar = rtt >> 1
+	if Kcp.rxSrtt == 0 {
+		Kcp.rxSrtt = rtt
+		Kcp.rxRttVar = rtt >> 1
 	} else {
-		delta := rtt - Kcp.rx_srtt
-		Kcp.rx_srtt += delta >> 3
+		delta := rtt - Kcp.rxSrtt
+		Kcp.rxSrtt += delta >> 3
 		if delta < 0 {
 			delta = -delta
 		}
-		if rtt < Kcp.rx_srtt-Kcp.rx_rttvar {
-			Kcp.rx_rttvar += (delta - Kcp.rx_rttvar) >> 5
+		if rtt < Kcp.rxSrtt-Kcp.rxRttVar {
+			Kcp.rxRttVar += (delta - Kcp.rxRttVar) >> 5
 		} else {
-			Kcp.rx_rttvar += (delta - Kcp.rx_rttvar) >> 2
+			Kcp.rxRttVar += (delta - Kcp.rxRttVar) >> 2
 		}
 	}
 	rto = uint32(
-		Kcp.rx_srtt,
-	) + _imax_(
+		Kcp.rxSrtt,
+	) + _imax(
 		Kcp.interval,
-		uint32(Kcp.rx_rttvar)<<2)
-	Kcp.rx_rto = _ibound_(
-		Kcp.rx_minrto,
+		uint32(Kcp.rxRttVar)<<2)
+	Kcp.rxRto = _ibound(
+		Kcp.rxMinRto,
 		rto,
-		IKCP_RTO_MAX,
+		IKcpRtoMax,
 	)
 }
 
 func (
 	Kcp *KCP,
-) shrink_buf() {
+) shrinkBuf() {
 	if len(
 		Kcp.SndBuf,
 	) > 0 {
 		KcpSeg := &Kcp.SndBuf[0]
-		Kcp.snd_una = KcpSeg.sn
+		Kcp.sndUna = KcpSeg.sn
 	} else {
-		Kcp.snd_una = Kcp.snd_nxt
+		Kcp.sndUna = Kcp.sndNxt
 	}
 }
 
 func (
 	Kcp *KCP,
-) parse_ack(
+) parseAck(
 	sn uint32,
 ) {
 	if _itimediff(
 		sn,
-		Kcp.snd_una,
+		Kcp.sndUna,
 	) < 0 || _itimediff(
 		sn,
-		Kcp.snd_nxt,
+		Kcp.sndNxt,
 	) >= 0 {
 		return
 	}
@@ -597,15 +600,15 @@ func (
 
 func (
 	Kcp *KCP,
-) parse_fastack(
+) parseFastack(
 	sn, ts uint32,
 ) {
 	if _itimediff(
 		sn,
-		Kcp.snd_una,
+		Kcp.sndUna,
 	) < 0 || _itimediff(
 		sn,
-		Kcp.snd_nxt,
+		Kcp.sndNxt,
 	) >= 0 {
 		return
 	}
@@ -627,7 +630,7 @@ func (
 
 func (
 	Kcp *KCP,
-) parse_una(
+) parseUna(
 	una uint32,
 ) {
 	count := 0
@@ -646,7 +649,7 @@ func (
 		}
 	}
 	if count > 0 {
-		Kcp.SndBuf = Kcp.remove_front(
+		Kcp.SndBuf = Kcp.removeFront(
 			Kcp.SndBuf,
 			count,
 		)
@@ -655,7 +658,7 @@ func (
 
 func (
 	Kcp *KCP,
-) ack_push(
+) ackPush(
 	sn,
 	ts uint32,
 ) {
@@ -669,28 +672,28 @@ func (
 
 func (
 	Kcp *KCP,
-) parse_data(
+) parseData(
 	newKcpSeg KcpSegment,
 ) bool {
 	sn := newKcpSeg.sn
 	if _itimediff(
 		sn,
-		Kcp.rcv_nxt+Kcp.rcv_wnd,
+		Kcp.rcvNxt+Kcp.rcvWnd,
 	) >= 0 ||
 		_itimediff(
 			sn,
-			Kcp.rcv_nxt,
+			Kcp.rcvNxt,
 		) < 0 {
 		return true
 	}
 
 	n := len(
-		Kcp.rcv_buf,
+		Kcp.rcvBuf,
 	) - 1
-	insert_idx := 0
+	insertIdx := 0
 	repeat := false
 	for i := n; i >= 0; i-- {
-		KcpSeg := &Kcp.rcv_buf[i]
+		KcpSeg := &Kcp.rcvBuf[i]
 		if KcpSeg.sn == sn {
 			repeat = true
 			break
@@ -699,7 +702,7 @@ func (
 			sn,
 			KcpSeg.sn,
 		) > 0 {
-			insert_idx = i + 1
+			insertIdx = i + 1
 			break
 		}
 	}
@@ -714,42 +717,42 @@ func (
 		)
 		newKcpSeg.data = dataCopy
 
-		if insert_idx == n+1 {
-			Kcp.rcv_buf = append(
-				Kcp.rcv_buf,
+		if insertIdx == n+1 {
+			Kcp.rcvBuf = append(
+				Kcp.rcvBuf,
 				newKcpSeg,
 			)
 		} else {
-			Kcp.rcv_buf = append(
-				Kcp.rcv_buf,
+			Kcp.rcvBuf = append(
+				Kcp.rcvBuf,
 				KcpSegment{},
 			)
 			copy(
-				Kcp.rcv_buf[insert_idx+1:],
-				Kcp.rcv_buf[insert_idx:],
+				Kcp.rcvBuf[insertIdx+1:],
+				Kcp.rcvBuf[insertIdx:],
 			)
-			Kcp.rcv_buf[insert_idx] = newKcpSeg
+			Kcp.rcvBuf[insertIdx] = newKcpSeg
 		}
 	}
 	count := 0
-	for k := range Kcp.rcv_buf {
-		KcpSeg := &Kcp.rcv_buf[k]
-		if KcpSeg.sn == Kcp.rcv_nxt && len(
-			Kcp.rcv_queue,
-		) < int(Kcp.rcv_wnd) {
-			Kcp.rcv_nxt++
+	for k := range Kcp.rcvBuf {
+		KcpSeg := &Kcp.rcvBuf[k]
+		if KcpSeg.sn == Kcp.rcvNxt && len(
+			Kcp.rcvQueue,
+		) < int(Kcp.rcvWnd) {
+			Kcp.rcvNxt++
 			count++
 		} else {
 			break
 		}
 	}
 	if count > 0 {
-		Kcp.rcv_queue = append(
-			Kcp.rcv_queue,
-			Kcp.rcv_buf[:count]...,
+		Kcp.rcvQueue = append(
+			Kcp.rcvQueue,
+			Kcp.rcvBuf[:count]...,
 		)
-		Kcp.rcv_buf = Kcp.remove_front(
-			Kcp.rcv_buf,
+		Kcp.rcvBuf = Kcp.removeFront(
+			Kcp.rcvBuf,
 			count,
 		)
 	}
@@ -765,10 +768,10 @@ func (
 	regular,
 	ackNoDelay bool,
 ) int {
-	snd_una := Kcp.snd_una
+	sndUna := Kcp.sndUna
 	if len(
 		data,
-	) < IKCP_OVERHEAD {
+	) < IKcpOverhead {
 		return -1
 	}
 	var latest uint32
@@ -785,41 +788,41 @@ func (
 			frg uint8
 		if len(
 			data,
-		) < int(IKCP_OVERHEAD) {
+		) < int(IKcpOverhead) {
 			break
 		}
-		data = iKcp_decode32u(
+		data = iKcpDecode32u(
 			data,
 			&conv,
 		)
 		if conv != Kcp.conv {
 			return -1
 		}
-		data = iKcp_decode8u(
+		data = iKcpDecode8u(
 			data,
 			&cmd,
 		)
-		data = iKcp_decode8u(
+		data = iKcpDecode8u(
 			data,
 			&frg,
 		)
-		data = iKcp_decode16u(
+		data = iKcpDecode16u(
 			data,
 			&wnd,
 		)
-		data = iKcp_decode32u(
+		data = iKcpDecode32u(
 			data,
 			&ts,
 		)
-		data = iKcp_decode32u(
+		data = iKcpDecode32u(
 			data,
 			&sn,
 		)
-		data = iKcp_decode32u(
+		data = iKcpDecode32u(
 			data,
 			&una,
 		)
-		data = iKcp_decode32u(
+		data = iKcpDecode32u(
 			data,
 			&length,
 		)
@@ -830,40 +833,40 @@ func (
 		) {
 			return -2
 		}
-		if cmd != IKCP_CMD_PUSH && cmd != IKCP_CMD_ACK &&
-			cmd != IKCP_CMD_WASK && cmd != IKCP_CMD_WINS {
+		if cmd != IKcpCmdPush && cmd != IKcpCmdAck &&
+			cmd != IKcpCmdWask && cmd != IKcpCmdWins {
 			return -3
 		}
 		if regular {
-			Kcp.rmt_wnd = uint32(wnd)
+			Kcp.rmtWnd = uint32(wnd)
 		}
-		Kcp.parse_una(
+		Kcp.parseUna(
 			una,
 		)
-		Kcp.shrink_buf()
-		if cmd == IKCP_CMD_ACK {
-			Kcp.parse_ack(
+		Kcp.shrinkBuf()
+		if cmd == IKcpCmdAck {
+			Kcp.parseAck(
 				sn,
 			)
-			Kcp.parse_fastack(
+			Kcp.parseFastack(
 				sn,
 				ts,
 			)
 			flag |= 1
 			latest = ts
-		} else if cmd == IKCP_CMD_PUSH {
+		} else if cmd == IKcpCmdPush {
 			repeat := true
 			if _itimediff(
 				sn,
-				Kcp.rcv_nxt+Kcp.rcv_wnd,
+				Kcp.rcvNxt+Kcp.rcvWnd,
 			) < 0 {
-				Kcp.ack_push(
+				Kcp.ackPush(
 					sn,
 					ts,
 				)
 				if _itimediff(
 					sn,
-					Kcp.rcv_nxt,
+					Kcp.rcvNxt,
 				) >= 0 {
 					var KcpSeg KcpSegment
 					KcpSeg.conv = conv
@@ -874,7 +877,7 @@ func (
 					KcpSeg.sn = sn
 					KcpSeg.una = una
 					KcpSeg.data = data[:length]
-					repeat = Kcp.parse_data(
+					repeat = Kcp.parseData(
 						KcpSeg,
 					)
 				}
@@ -885,23 +888,27 @@ func (
 					1,
 				)
 			}
-		} else if cmd == IKCP_CMD_WASK {
-			Kcp.probe |= IKCP_ASK_TELL
-		} else if cmd == IKCP_CMD_WINS {
+		} else if cmd == IKcpCmdWask {
+			Kcp.probe |= IKcpAskTell
+			//} else if cmd == IKcpCmdWins {
+			// XXX(jhj) ???
 		} else {
 			return -3
 		}
 		inSegs++
 		data = data[length:]
 	}
-	atomic.AddUint64(&DefaultSnsi.KcpInputSegments, inSegs)
+	atomic.AddUint64(
+		&DefaultSnsi.KcpInputSegments,
+		inSegs,
+	)
 	if flag != 0 && regular {
 		current := KcpCurrentMs()
 		if _itimediff(
 			current,
 			latest,
 		) >= 0 {
-			Kcp.update_ack(
+			Kcp.updateAck(
 				_itimediff(
 					current,
 					latest,
@@ -911,10 +918,10 @@ func (
 	}
 	if Kcp.nocwnd == 0 {
 		if _itimediff(
-			Kcp.snd_una,
-			snd_una,
+			Kcp.sndUna,
+			sndUna,
 		) > 0 {
-			if Kcp.cwnd < Kcp.rmt_wnd {
+			if Kcp.cwnd < Kcp.rmtWnd {
 				mss := Kcp.mss
 				if Kcp.cwnd < Kcp.ssthresh {
 					Kcp.cwnd++
@@ -928,9 +935,9 @@ func (
 						Kcp.cwnd++
 					}
 				}
-				if Kcp.cwnd > Kcp.rmt_wnd {
-					Kcp.cwnd = Kcp.rmt_wnd
-					Kcp.incr = Kcp.rmt_wnd * mss
+				if Kcp.cwnd > Kcp.rmtWnd {
+					Kcp.cwnd = Kcp.rmtWnd
+					Kcp.incr = Kcp.rmtWnd * mss
 				}
 			}
 		}
@@ -947,18 +954,19 @@ func (
 
 func (
 	Kcp *KCP,
-) wnd_unused() uint16 {
+) wndUnused() uint16 {
 	if len(
-		Kcp.rcv_queue,
-	) < int(Kcp.rcv_wnd) {
-		return uint16(int(Kcp.rcv_wnd) - len(
-			Kcp.rcv_queue,
+		Kcp.rcvQueue,
+	) < int(Kcp.rcvWnd) {
+		return uint16(int(Kcp.rcvWnd) - len(
+			Kcp.rcvQueue,
 		),
 		)
 	}
 	return 0
 }
 
+// Flush ...
 func (
 	Kcp *KCP,
 ) Flush(
@@ -966,9 +974,9 @@ func (
 ) uint32 {
 	var KcpSeg KcpSegment
 	KcpSeg.conv = Kcp.conv
-	KcpSeg.cmd = IKCP_CMD_ACK
-	KcpSeg.wnd = Kcp.wnd_unused()
-	KcpSeg.una = Kcp.rcv_nxt
+	KcpSeg.cmd = IKcpCmdAck
+	KcpSeg.wnd = Kcp.wndUnused()
+	KcpSeg.una = Kcp.rcvNxt
 	buffer := Kcp.buffer
 	ptr := buffer[Kcp.reserved:]
 	makeSpace := func(
@@ -1002,9 +1010,9 @@ func (
 	}
 	for i, ack := range Kcp.acklist {
 		makeSpace(
-			IKCP_OVERHEAD,
+			IKcpOverhead,
 		)
-		if ack.sn >= Kcp.rcv_nxt || len(
+		if ack.sn >= Kcp.rcvNxt || len(
 			Kcp.acklist,
 		)-1 == i {
 			KcpSeg.sn,
@@ -1020,76 +1028,76 @@ func (
 		FlushBuffer()
 		return Kcp.interval
 	}
-	if Kcp.rmt_wnd == 0 {
+	if Kcp.rmtWnd == 0 {
 		current := KcpCurrentMs()
-		if Kcp.probe_wait == 0 {
-			Kcp.probe_wait = IKCP_PROBE_INIT
-			Kcp.ts_probe = current + Kcp.probe_wait
-		} else if _itimediff(current, Kcp.ts_probe) >= 0 {
-			if Kcp.probe_wait < IKCP_PROBE_INIT {
-				Kcp.probe_wait = IKCP_PROBE_INIT
+		if Kcp.probeWait == 0 {
+			Kcp.probeWait = IKcpProbeInit
+			Kcp.tsProbe = current + Kcp.probeWait
+		} else if _itimediff(current, Kcp.tsProbe) >= 0 {
+			if Kcp.probeWait < IKcpProbeInit {
+				Kcp.probeWait = IKcpProbeInit
 			}
-			Kcp.probe_wait += Kcp.probe_wait / 2
-			if Kcp.probe_wait > IKCP_PROBE_LIMIT {
-				Kcp.probe_wait = IKCP_PROBE_LIMIT
+			Kcp.probeWait += Kcp.probeWait / 2
+			if Kcp.probeWait > IKcpProbeLimit {
+				Kcp.probeWait = IKcpProbeLimit
 			}
-			Kcp.ts_probe = current + Kcp.probe_wait
-			Kcp.probe |= IKCP_ASK_SEND
+			Kcp.tsProbe = current + Kcp.probeWait
+			Kcp.probe |= IKcpAskSend
 		}
 	}
-	Kcp.ts_probe = 0
-	Kcp.probe_wait = 0
-	if (Kcp.probe & IKCP_ASK_SEND) != 0 {
-		KcpSeg.cmd = IKCP_CMD_WASK
+	Kcp.tsProbe = 0
+	Kcp.probeWait = 0
+	if (Kcp.probe & IKcpAskSend) != 0 {
+		KcpSeg.cmd = IKcpCmdWask
 		makeSpace(
-			IKCP_OVERHEAD,
+			IKcpOverhead,
 		)
 		ptr = KcpSeg.encode(
 			ptr,
 		)
 	}
-	if (Kcp.probe & IKCP_ASK_TELL) != 0 {
-		KcpSeg.cmd = IKCP_CMD_WINS
+	if (Kcp.probe & IKcpAskTell) != 0 {
+		KcpSeg.cmd = IKcpCmdWins
 		makeSpace(
-			IKCP_OVERHEAD,
+			IKcpOverhead,
 		)
 		ptr = KcpSeg.encode(
 			ptr,
 		)
 	}
 	Kcp.probe = 0
-	cwnd := _imin_(
-		Kcp.snd_wnd,
-		Kcp.rmt_wnd,
+	cwnd := _imin(
+		Kcp.sndWnd,
+		Kcp.rmtWnd,
 	)
 	if Kcp.nocwnd == 0 {
-		cwnd = _imin_(
+		cwnd = _imin(
 			Kcp.cwnd,
 			cwnd,
 		)
 	}
 	newSegsCount := 0
-	for k := range Kcp.snd_queue {
+	for k := range Kcp.sndQueue {
 		if _itimediff(
-			Kcp.snd_nxt,
-			Kcp.snd_una+cwnd,
+			Kcp.sndNxt,
+			Kcp.sndUna+cwnd,
 		) >= 0 {
 			break
 		}
-		newKcpSeg := Kcp.snd_queue[k]
+		newKcpSeg := Kcp.sndQueue[k]
 		newKcpSeg.conv = Kcp.conv
-		newKcpSeg.cmd = IKCP_CMD_PUSH
-		newKcpSeg.sn = Kcp.snd_nxt
+		newKcpSeg.cmd = IKcpCmdPush
+		newKcpSeg.sn = Kcp.sndNxt
 		Kcp.SndBuf = append(
 			Kcp.SndBuf,
 			newKcpSeg,
 		)
-		Kcp.snd_nxt++
+		Kcp.sndNxt++
 		newSegsCount++
 	}
 	if newSegsCount > 0 {
-		Kcp.snd_queue = Kcp.remove_front(
-			Kcp.snd_queue,
+		Kcp.sndQueue = Kcp.removeFront(
+			Kcp.sndQueue,
 			newSegsCount,
 		)
 	}
@@ -1115,7 +1123,7 @@ func (
 		}
 		if KcpSegment.Kxmit == 0 {
 			needsend = true
-			KcpSegment.rto = Kcp.rx_rto
+			KcpSegment.rto = Kcp.rxRto
 			KcpSegment.KcpResendTs = current + KcpSegment.rto
 		} else if _itimediff(
 			current,
@@ -1123,9 +1131,9 @@ func (
 		) >= 0 {
 			needsend = true
 			if Kcp.nodelay == 0 {
-				KcpSegment.rto += Kcp.rx_rto
+				KcpSegment.rto += Kcp.rxRto
 			} else {
-				KcpSegment.rto += Kcp.rx_rto / 2
+				KcpSegment.rto += Kcp.rxRto / 2
 			}
 			KcpSegment.KcpResendTs = current + KcpSegment.rto
 			lost++
@@ -1133,14 +1141,14 @@ func (
 		} else if KcpSegment.fastack >= resent {
 			needsend = true
 			KcpSegment.fastack = 0
-			KcpSegment.rto = Kcp.rx_rto
+			KcpSegment.rto = Kcp.rxRto
 			KcpSegment.KcpResendTs = current + KcpSegment.rto
 			change++
 			fastKcpRestransmittedSegments++
 		} else if KcpSegment.fastack > 0 && newSegsCount == 0 {
 			needsend = true
 			KcpSegment.fastack = 0
-			KcpSegment.rto = Kcp.rx_rto
+			KcpSegment.rto = Kcp.rxRto
 			KcpSegment.KcpResendTs = current + KcpSegment.rto
 			change++
 			earlyKcpRestransmittedSegments++
@@ -1151,7 +1159,7 @@ func (
 			KcpSegment.ts = current
 			KcpSegment.wnd = KcpSeg.wnd
 			KcpSegment.una = KcpSeg.una
-			need := IKCP_OVERHEAD + len(
+			need := IKcpOverhead + len(
 				KcpSegment.data,
 			)
 			makeSpace(
@@ -1167,7 +1175,7 @@ func (
 			ptr = ptr[len(
 				KcpSegment.data,
 			):]
-			if KcpSegment.Kxmit >= Kcp.dead_link {
+			if KcpSegment.Kxmit >= Kcp.deadLink {
 				Kcp.state = 0xFFFFFFFF
 			}
 		}
@@ -1208,18 +1216,18 @@ func (
 	}
 	if Kcp.nocwnd == 0 {
 		if change > 0 {
-			inflight := Kcp.snd_nxt - Kcp.snd_una
+			inflight := Kcp.sndNxt - Kcp.sndUna
 			Kcp.ssthresh = inflight / 2
-			if Kcp.ssthresh < IKCP_THRESH_MIN {
-				Kcp.ssthresh = IKCP_THRESH_MIN
+			if Kcp.ssthresh < IKcpThreshMin {
+				Kcp.ssthresh = IKcpThreshMin
 			}
 			Kcp.cwnd = Kcp.ssthresh + resent
 			Kcp.incr = Kcp.cwnd * Kcp.mss
 		}
 		if lost > 0 {
 			Kcp.ssthresh = cwnd / 2
-			if Kcp.ssthresh < IKCP_THRESH_MIN {
-				Kcp.ssthresh = IKCP_THRESH_MIN
+			if Kcp.ssthresh < IKcpThreshMin {
+				Kcp.ssthresh = IKcpThreshMin
 			}
 			Kcp.cwnd = 1
 			Kcp.incr = Kcp.mss
@@ -1244,23 +1252,23 @@ func (
 	current := KcpCurrentMs()
 	if Kcp.updated == 0 {
 		Kcp.updated = 1
-		Kcp.ts_Flush = current
+		Kcp.tsFlush = current
 	}
 	slap = _itimediff(
 		current,
-		Kcp.ts_Flush,
+		Kcp.tsFlush,
 	)
 	if slap >= 10000 || slap < -10000 {
-		Kcp.ts_Flush = current
+		Kcp.tsFlush = current
 		slap = 0
 	}
 	if slap >= 0 {
-		Kcp.ts_Flush += Kcp.interval
+		Kcp.tsFlush += Kcp.interval
 		if _itimediff(
 			current,
-			Kcp.ts_Flush,
+			Kcp.tsFlush,
 		) >= 0 {
-			Kcp.ts_Flush = current + Kcp.interval
+			Kcp.tsFlush = current + Kcp.interval
 		}
 		Kcp.Flush(
 			false,
@@ -1279,31 +1287,31 @@ func (
 	Kcp *KCP,
 ) Check() uint32 {
 	current := KcpCurrentMs()
-	ts_Flush := Kcp.ts_Flush
-	tm_Flush := int32(0x7FFFFFFF)
-	tm_packet := int32(0x7FFFFFFF)
+	tsFlush := Kcp.tsFlush
+	tmFlush := int32(0x7FFFFFFF)
+	tmPacket := int32(0x7FFFFFFF)
 	minimal := uint32(0)
 	if Kcp.updated == 0 {
 		return current
 	}
 	if _itimediff(
 		current,
-		ts_Flush,
+		tsFlush,
 	) >= 10000 ||
 		_itimediff(
 			current,
-			ts_Flush,
+			tsFlush,
 		) < -10000 {
-		ts_Flush = current
+		tsFlush = current
 	}
 	if _itimediff(
 		current,
-		ts_Flush,
+		tsFlush,
 	) >= 0 {
 		return current
 	}
-	tm_Flush = _itimediff(
-		ts_Flush,
+	tmFlush = _itimediff(
+		tsFlush,
 		current,
 	)
 	for k := range Kcp.SndBuf {
@@ -1315,13 +1323,13 @@ func (
 		if diff <= 0 {
 			return current
 		}
-		if diff < tm_packet {
-			tm_packet = diff
+		if diff < tmPacket {
+			tmPacket = diff
 		}
 	}
-	minimal = uint32(tm_packet)
-	if tm_packet >= tm_Flush {
-		minimal = uint32(tm_Flush)
+	minimal = uint32(tmPacket)
+	if tmPacket >= tmFlush {
+		minimal = uint32(tmFlush)
 	}
 	if minimal >= Kcp.interval {
 		minimal = Kcp.interval
@@ -1336,10 +1344,10 @@ func (
 ) SetMtu(
 	mtu int,
 ) int {
-	if mtu < 50 || mtu < IKCP_OVERHEAD {
+	if mtu < 50 || mtu < IKcpOverhead {
 		return -1
 	}
-	if Kcp.reserved >= int(Kcp.mtu-IKCP_OVERHEAD) || Kcp.reserved < 0 {
+	if Kcp.reserved >= int(Kcp.mtu-IKcpOverhead) || Kcp.reserved < 0 {
 		return -1
 	}
 	buffer := make(
@@ -1350,7 +1358,7 @@ func (
 		return -2
 	}
 	Kcp.mtu = uint32(mtu)
-	Kcp.mss = Kcp.mtu - IKCP_OVERHEAD - uint32(Kcp.reserved)
+	Kcp.mss = Kcp.mtu - IKcpOverhead - uint32(Kcp.reserved)
 	Kcp.buffer = buffer
 	return 0
 }
@@ -1372,9 +1380,9 @@ func (
 	if nodelay >= 0 {
 		Kcp.nodelay = uint32(nodelay)
 		if nodelay != 0 {
-			Kcp.rx_minrto = IKCP_RTO_NDL
+			Kcp.rxMinRto = IKcpRtoNdl
 		} else {
-			Kcp.rx_minrto = IKCP_RTO_MIN
+			Kcp.rxMinRto = IKcpRtoMin
 		}
 	}
 	if interval >= 0 {
@@ -1402,10 +1410,10 @@ func (
 	rcvwnd int,
 ) int {
 	if sndwnd > 0 {
-		Kcp.snd_wnd = uint32(sndwnd)
+		Kcp.sndWnd = uint32(sndwnd)
 	}
 	if rcvwnd > 0 {
-		Kcp.rcv_wnd = uint32(rcvwnd)
+		Kcp.rcvWnd = uint32(rcvwnd)
 	}
 	return 0
 }
@@ -1417,13 +1425,13 @@ func (
 	return len(
 		Kcp.SndBuf,
 	) + len(
-		Kcp.snd_queue,
+		Kcp.sndQueue,
 	)
 }
 
 func (
 	Kcp *KCP,
-) remove_front(
+) removeFront(
 	q []KcpSegment,
 	n int,
 ) []KcpSegment {

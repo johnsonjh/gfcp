@@ -72,7 +72,7 @@ func (
 					)
 					continue
 				}
-				if msg.N < s.headerSize+IKCP_OVERHEAD {
+				if msg.N < s.headerSize+IKcpOverhead {
 					atomic.AddUint64(
 						&DefaultSnsi.KcpInputErrors,
 						1,
@@ -123,7 +123,7 @@ func (
 					)
 					continue
 				}
-				if msg.N < s.headerSize+IKCP_OVERHEAD {
+				if msg.N < s.headerSize+IKcpOverhead {
 					atomic.AddUint64(
 						&DefaultSnsi.KcpInputErrors,
 						1,
@@ -178,7 +178,7 @@ func (
 		); err == nil {
 			for i := 0; i < count; i++ {
 				msg := &msgs[i]
-				if msg.N >= l.headerSize+IKCP_OVERHEAD {
+				if msg.N >= l.headerSize+IKcpOverhead {
 					l.packetInput(
 						msg.Buffers[0][:msg.N],
 						msg.Addr,
@@ -219,7 +219,7 @@ func (
 		); err == nil {
 			for i := 0; i < count; i++ {
 				msg := &msgs[i]
-				if msg.N >= l.headerSize+IKCP_OVERHEAD {
+				if msg.N >= l.headerSize+IKcpOverhead {
 					l.packetInput(
 						msg.Buffers[0][:msg.N],
 						msg.Addr,

@@ -15,7 +15,7 @@ import (
 	"sync/atomic"
 )
 
-// Snsi: Simple Network Statistics Indicators
+// Snsi == Simple Network Statistics Indicators
 type Snsi struct {
 	KcpBytesSent                   uint64 // Bytes sent from upper level
 	KcpBytesReceived               uint64 // Bytes received to upper level
@@ -35,7 +35,7 @@ type Snsi struct {
 	KcpRestransmittedSegments      uint64 // Accmulated retransmited KSegments
 	FastKcpRestransmittedSegments  uint64 // Accmulated fast retransmitted KSegments
 	EarlyKcpRestransmittedSegments uint64 // Accmulated early retransmitted KSegments
-	LostSegments                   uint64 // Number of segs infered as lost
+	LostSegments                   uint64 // Number of segs inferred as lost
 	DuplicateSegments              uint64 // Number of segs duplicated
 	KcpFECRecovered                uint64 // Correct packets recovered from FEC
 	KcpFailures                    uint64 // Incorrect packets recovered from FEC

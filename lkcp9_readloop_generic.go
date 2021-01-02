@@ -37,7 +37,7 @@ func (
 				)
 				continue
 			}
-			if n >= s.headerSize+IKCP_OVERHEAD {
+			if n >= s.headerSize+IKcpOverhead {
 				s.packetInput(
 					buf[:n],
 				)
@@ -65,7 +65,7 @@ func (
 		if n, from, err := l.conn.ReadFrom(
 			buf,
 		); err == nil {
-			if n >= l.headerSize+IKCP_OVERHEAD {
+			if n >= l.headerSize+IKcpOverhead {
 				l.packetInput(
 					buf[:n],
 					from,

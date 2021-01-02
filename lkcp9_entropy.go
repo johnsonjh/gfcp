@@ -26,25 +26,32 @@ type Entropy interface {
 	)
 }
 
+// KcpNonceMD5 ...
 type KcpNonceMD5 struct {
 	seed [md5.Size]byte
 }
 
+// Init ...
 func (
 	n *KcpNonceMD5,
 ) Init() {
 }
 
+// Fill ...
 func (
 	n *KcpNonceMD5,
 ) Fill(
 	nonce []byte,
 ) {
+	var err error
 	if n.seed[0] == 0 {
-		io.ReadFull(
+		_, err = io.ReadFull(
 			rand.Reader,
 			n.seed[:],
 		)
+		if err != nil {
+			panic("io.ReadFull failure")
+		}
 	}
 	n.seed = md5.Sum(
 		n.seed[:],
@@ -55,39 +62,53 @@ func (
 	)
 }
 
+// KcpNonceAES128 ...
 type KcpNonceAES128 struct {
 	seed  [aes.BlockSize]byte
 	block cipher.Block
 }
 
+// Init ...
 func (
 	n *KcpNonceAES128,
 ) Init() {
+	var err error
 	var key [16]byte
-	io.ReadFull(
+	_, err = io.ReadFull(
 		rand.Reader,
 		key[:],
 	)
-	io.ReadFull(
+	if err != nil {
+		panic("io.ReadFull failure")
+	}
+	_, err = io.ReadFull(
 		rand.Reader,
 		n.seed[:],
 	)
+	if err != nil {
+		panic("io.ReadFull failure")
+	}
 	block, _ := aes.NewCipher(
 		key[:],
 	)
 	n.block = block
 }
 
+// Fill ...
 func (
 	n *KcpNonceAES128,
 ) Fill(
 	nonce []byte,
 ) {
+	var err error
 	if n.seed[0] == 0 {
-		io.ReadFull(
+		_, err = io.ReadFull(
 			rand.Reader,
 			n.seed[:],
 		)
+		if err != nil {
+			panic("io.ReadFull failure")
+		}
 	}
 	n.block.Encrypt(
 		n.seed[:],

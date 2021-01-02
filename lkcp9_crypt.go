@@ -22,9 +22,9 @@ import (
 	"golang.org/x/crypto/salsa20"
 )
 
-const (
+/*const (
 	chunk = 64
-)
+)*/
 
 var (
 	initialVector = []byte{
@@ -36,12 +36,12 @@ var (
 	saltxor = `sH3CIVoF#rWLtJo6`
 )
 
-type digest struct {
+/*type digest struct {
 	h   [5]uint32
 	x   [chunk]byte
 	nx  int
 	len uint64
-}
+}*/
 
 // BlockCrypt defines crypto methods for a given byte slice
 type BlockCrypt interface {
@@ -272,7 +272,7 @@ type noneBlockCrypt struct{}
 
 // NewNoneBlockCrypt function (null encryption)
 func NewNoneBlockCrypt(
-	key []byte,
+	_ []byte,
 ) (
 	BlockCrypt,
 	error,

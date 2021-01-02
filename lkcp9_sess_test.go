@@ -55,15 +55,12 @@ func init() {
 			http.ListenAndServe(
 				"127.0.0.1:8881",
 				nil,
-			))
+			),
+		)
 	}()
-
 	go echoServer()
 	go sinkServer()
 	go tinyBufferEchoServer()
-	println(
-		"Beginning tests:\nEncryption: Salsa20n\nFEC: 10/3",
-	)
 }
 
 func dialEcho() (
@@ -371,9 +368,9 @@ func handleEcho(
 		conn.Write(
 			buf[:n],
 		)
+		runtime.GC()
+		debug.FreeOSMemory()
 	}
-	runtime.GC()
-	debug.FreeOSMemory()
 }
 
 func handleSink(
@@ -420,9 +417,9 @@ func handleSink(
 				err,
 			)
 		}
+		runtime.GC()
+		debug.FreeOSMemory()
 	}
-	runtime.GC()
-	debug.FreeOSMemory()
 }
 
 func handleTinyBufferEcho(
@@ -447,9 +444,9 @@ func handleTinyBufferEcho(
 		conn.Write(
 			buf[:n],
 		)
+		runtime.GC()
+		debug.FreeOSMemory()
 	}
-	runtime.GC()
-	debug.FreeOSMemory()
 }
 
 func TestTimeout(
@@ -963,7 +960,7 @@ func sink_tester(
 	return nil
 }
 
-func TestSNSI(
+func TestSnsi(
 	t *testing.T,
 ) {
 	defer u.Leakplug(

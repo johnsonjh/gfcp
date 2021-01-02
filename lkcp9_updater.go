@@ -170,8 +170,8 @@ func (
 
 		if hlen > 0 {
 			timer.Reset(
-				h.entries[0].ts.Sub(
-					time.Now(),
+				time.Until(
+					h.entries[0].ts,
 				),
 			)
 		}
