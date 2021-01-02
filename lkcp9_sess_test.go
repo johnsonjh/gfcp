@@ -694,13 +694,13 @@ func TestParallel(
 ) {
 	concurrent := 1024
 	if runtime.GOOS == "darwin" {
-		t.Log("--- WARN: Detected macOS: Lowering concurrency to 128")
+		t.Log("\n--- WARN: Detected macOS: Lowering concurrency to 128")
 		concurrent = 128
 		return
 	}
 	t.Log(
 		fmt.Sprintf(
-			"--- INFO: Target concurrency: %v",
+			"\n--- INFO: Target concurrency: %v",
 			concurrent,
 		),
 	)
@@ -765,7 +765,7 @@ func BenchmarkEchoSpeed4K(
 ) {
 	speedclient(
 		b,
-		4096,
+		4*1024,
 	)
 }
 
@@ -774,15 +774,15 @@ func BenchmarkEchoSpeed64K(
 ) {
 	speedclient(
 		b,
-		65536,
+		64*1024,
 	)
 }
 
-func BenchmarkEchoSpeed512K(
+func BenchmarkEchoSpeed256K(
 	b *testing.B,
 ) {
 	speedclient(b,
-		524288,
+		256*1024,
 	)
 }
 
@@ -791,7 +791,7 @@ func BenchmarkEchoSpeed1M(
 ) {
 	speedclient(
 		b,
-		1048576,
+		1*1024*1024,
 	)
 }
 
@@ -937,16 +937,16 @@ func TestSnsi(
 	t.Log(
 		*lkcp9.DefaultSnsi.Copy(),
 	)
-	t.Log(
-		lkcp9.DefaultSnsi.Header(),
-	)
+	//t.Log(
+	//	lkcp9.DefaultSnsi.Header(),
+	//)
 	t.Log(
 		lkcp9.DefaultSnsi.ToSlice(),
 	)
 	lkcp9.DefaultSnsi.Reset()
-	t.Log(
-		lkcp9.DefaultSnsi.ToSlice(),
-	)
+	//t.Log(
+	//	lkcp9.DefaultSnsi.ToSlice(),
+	//)
 }
 
 func TestListenerClose(
@@ -980,7 +980,7 @@ func TestListenerClose(
 		),
 	)
 	time.Sleep(
-		1 * time.Second,
+		50 * time.Millisecond,
 	)
 	if _, err := l.Accept(); err == nil {
 		t.Fail()

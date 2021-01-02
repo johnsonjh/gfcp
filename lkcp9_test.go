@@ -28,7 +28,7 @@ func TestArchitecture(
 	is64bit := uint64(^uintptr(0)) == ^uint64(0)
 	if !is64bit {
 		t.Fatal(
-			"Not 64-bit: Unsupported architecture",
+			"\n\t*** Platform is not 64-bit, unsupported architecture",
 		)
 	}
 }
@@ -41,9 +41,9 @@ func TestGoEnvironment(
 	)
 	t.Log(
 		fmt.Sprintf(
-			"Built with %v (%v)for %v/%v\n%v logical CPUs, %v goroutines available",
-			runtime.Version(),
+			"\n\tCompiler:\t%v (%v)\n\tSystem:\t\t%v/%v\n\tCPU(s):\t\t%v logical processor(s)\n\tGOMAXPROCS:\t%v\n",
 			runtime.Compiler,
+			runtime.Version(),
 			runtime.GOOS,
 			runtime.GOARCH,
 			runtime.NumCPU(),
@@ -63,12 +63,12 @@ func TestLKcp9License(
 		licenses,
 	) == 0 {
 		t.Fatal(
-			"\nlkcp9_license_test.TestLKcp9License FAILURE:",
+			"\n\nlkcp9_license_test.TestLKcp9License FAILURE",
 		)
 	} else {
 		t.Log(
 			fmt.Sprintf(
-				"\nEmbedded Licesnse data:\n%v\n",
+				"\n\n%v\n",
 				licenses,
 			),
 		)

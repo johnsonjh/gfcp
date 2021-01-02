@@ -45,7 +45,9 @@ func (
 	)
 }
 
-func (bts FecPacket) data() []byte {
+func (
+	bts FecPacket,
+) data() []byte {
 	return bts[6:]
 }
 
@@ -106,8 +108,16 @@ func KcpNewDECDecoder(
 }
 
 // Decode ...
-func (dec *FecDecoder) Decode(in FecPacket) (recovered [][]byte) {
-	n := len(dec.rx) - 1
+func (
+	dec *FecDecoder,
+) Decode(
+	in FecPacket,
+) (
+	recovered [][]byte,
+) {
+	n := len(
+		dec.rx,
+	) - 1
 	insertIdx := 0
 	for i := n; i >= 0; i-- {
 		if in.seqid() == dec.rx[i].seqid() {
@@ -119,14 +129,30 @@ func (dec *FecDecoder) Decode(in FecPacket) (recovered [][]byte) {
 	}
 
 	// make a copy
-	pkt := FecPacket(KxmitBuf.Get().([]byte)[:len(in)])
-	copy(pkt, in)
+	pkt := FecPacket(
+		KxmitBuf.Get().([]byte)[:len(
+			in,
+		)],
+	)
+	copy(
+		pkt,
+		in,
+	)
 
 	if insertIdx == n+1 {
-		dec.rx = append(dec.rx, pkt)
+		dec.rx = append(
+			dec.rx,
+			pkt,
+		)
 	} else {
-		dec.rx = append(dec.rx, FecPacket{})
-		copy(dec.rx[insertIdx+1:], dec.rx[insertIdx:])
+		dec.rx = append(
+			dec.rx,
+			FecPacket{},
+		)
+		copy(
+			dec.rx[insertIdx+1:],
+			dec.rx[insertIdx:],
+		)
 		dec.rx[insertIdx] = pkt
 	}
 
@@ -138,8 +164,12 @@ func (dec *FecDecoder) Decode(in FecPacket) (recovered [][]byte) {
 		searchBegin = 0
 	}
 	searchEnd := searchBegin + dec.shardSize - 1
-	if searchEnd >= len(dec.rx) {
-		searchEnd = len(dec.rx) - 1
+	if searchEnd >= len(
+		dec.rx,
+	) {
+		searchEnd = len(
+			dec.rx,
+		) - 1
 	}
 
 	if searchEnd-searchBegin+1 >= dec.dataShards {
@@ -154,9 +184,15 @@ func (dec *FecDecoder) Decode(in FecPacket) (recovered [][]byte) {
 
 		for i := searchBegin; i <= searchEnd; i++ {
 			seqid := dec.rx[i].seqid()
-			if _itimediff(seqid, shardEnd) > 0 {
+			if _itimediff(
+				seqid,
+				shardEnd,
+			) > 0 {
 				break
-			} else if _itimediff(seqid, shardBegin) >= 0 {
+			} else if _itimediff(
+				seqid,
+				shardBegin,
+			) >= 0 {
 				shards[seqid%uint32(dec.shardSize)] = dec.rx[i].data()
 				shardsflag[seqid%uint32(dec.shardSize)] = true
 				numshard++
@@ -166,54 +202,91 @@ func (dec *FecDecoder) Decode(in FecPacket) (recovered [][]byte) {
 				if numshard == 1 {
 					first = i
 				}
-				if len(dec.rx[i].data()) > maxlen {
-					maxlen = len(dec.rx[i].data())
+				if len(
+					dec.rx[i].data(),
+				) > maxlen {
+					maxlen = len(
+						dec.rx[i].data(),
+					)
 				}
 			}
 		}
 
 		if numDataShard == dec.dataShards {
-			dec.rx = dec.freeRange(first, numshard, dec.rx)
+			dec.rx = dec.freeRange(
+				first,
+				numshard,
+				dec.rx,
+			)
 		} else if numshard >= dec.dataShards {
 			for k := range shards {
 				if shards[k] != nil {
-					dlen := len(shards[k])
+					dlen := len(
+						shards[k],
+					)
 					shards[k] = shards[k][:maxlen]
 					copy(shards[k][dlen:], dec.zeros)
 				} else {
 					shards[k] = KxmitBuf.Get().([]byte)[:0]
 				}
 			}
-			if err := dec.codec.ReconstructData(shards); err == nil {
+			if err := dec.codec.ReconstructData(
+				shards,
+			); err == nil {
 				for k := range shards[:dec.dataShards] {
 					if !shardsflag[k] {
-						recovered = append(recovered, shards[k])
+						recovered = append(
+							recovered,
+							shards[k],
+						)
 					}
 				}
 			}
-			dec.rx = dec.freeRange(first, numshard, dec.rx)
+			dec.rx = dec.freeRange(
+				first,
+				numshard,
+				dec.rx,
+			)
 		}
 	}
 
 	if len(dec.rx) > dec.rxlimit {
 		if dec.rx[0].flag() == KTypeData {
-			atomic.AddUint64(&DefaultSnsi.KcpFECRuntShards, 1)
+			atomic.AddUint64(
+				&DefaultSnsi.KcpFECRuntShards,
+				1,
+			)
 		}
-		dec.rx = dec.freeRange(0, 1, dec.rx)
+		dec.rx = dec.freeRange(
+			0,
+			1,
+			dec.rx,
+		)
 	}
 	return
 }
 
-func (dec *FecDecoder) freeRange(first, n int, q []FecPacket) []FecPacket {
+func (
+	dec *FecDecoder,
+) freeRange(
+	first,
+	n int,
+	q []FecPacket,
+) []FecPacket {
 	for i := first; i < first+n; i++ {
 		// TODO(jhj): Switch to pointer to avoid allocation.
-		KxmitBuf.Put([]byte(q[i]))
+		KxmitBuf.Put(
+			[]byte(q[i]),
+		)
 	}
 
-	if first == 0 && n < cap(q)/2 {
+	if first == 0 && n < (cap(q)/2) {
 		return q[n:]
 	}
-	copy(q[first:], q[first+n:])
+	copy(
+		q[first:],
+		q[first+n:],
+	)
 	return q[:len(q)-n]
 }
 
@@ -290,12 +363,21 @@ func (
 	enc.markData(
 		b[enc.headerOffset:],
 	)
-	binary.LittleEndian.PutUint16(b[enc.payloadOffset:], uint16(len(b[enc.payloadOffset:])))
+	binary.LittleEndian.PutUint16(
+		b[enc.payloadOffset:],
+		uint16(len(
+			b[enc.payloadOffset:],
+		),
+		),
+	)
 	sz := len(
 		b,
 	)
 	enc.shardCache[enc.shardCount] = enc.shardCache[enc.shardCount][:sz]
-	copy(enc.shardCache[enc.shardCount][enc.payloadOffset:], b[enc.payloadOffset:])
+	copy(
+		enc.shardCache[enc.shardCount][enc.payloadOffset:],
+		b[enc.payloadOffset:],
+	)
 	enc.shardCount++
 	if sz > enc.maxSize {
 		enc.maxSize = sz
@@ -332,14 +414,34 @@ func (
 	return
 }
 
-func (enc *FecEncoder) markData(data []byte) {
-	binary.LittleEndian.PutUint32(data, enc.next)
-	binary.LittleEndian.PutUint16(data[4:], KTypeData)
+func (
+	enc *FecEncoder,
+) markData(
+	data []byte,
+) {
+	binary.LittleEndian.PutUint32(
+		data,
+		enc.next,
+	)
+	binary.LittleEndian.PutUint16(
+		data[4:],
+		KTypeData,
+	)
 	enc.next++
 }
 
-func (enc *FecEncoder) markParity(data []byte) {
-	binary.LittleEndian.PutUint32(data, enc.next)
-	binary.LittleEndian.PutUint16(data[4:], KTypeParity)
+func (
+	enc *FecEncoder,
+) markParity(
+	data []byte,
+) {
+	binary.LittleEndian.PutUint32(
+		data,
+		enc.next,
+	)
+	binary.LittleEndian.PutUint16(
+		data[4:],
+		KTypeParity,
+	)
 	enc.next = (enc.next + 1) % enc.paws
 }
