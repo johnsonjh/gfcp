@@ -135,7 +135,7 @@ func newUDPSession(
 		chan struct{},
 	)
 	sess.nonce = new(
-		KcpNonceAES128,
+		KcpNonceHH,
 	)
 	sess.nonce.Init()
 	sess.chReadEvent = make(

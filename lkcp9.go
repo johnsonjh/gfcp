@@ -14,33 +14,35 @@ package lkcp9 // import "go.gridfinity.dev/lkcp9"
 import (
 	"encoding/binary"
 	"sync/atomic"
+	"runtime"
+	"math"
 
 	lkcp9Legal "go4.org/legal"
 )
 
 // IKcp9 protocol constants
 const (
-	IKcpRtoNdl     = 30  // IKcpRtoNdl:	NoDelay min RTO
-	IKcpRtoMin     = 100 // IKcpRtoMin:	Regular min RTO
-	IKcpRtoDef     = 200
-	IKcpRtoMax     = 60000
+	IKcpRtoNdl     = 20  // IKcpRtoNdl:	NoDelay min RTO
+	IKcpRtoMin     = 90 // IKcpRtoMin:	Regular min RTO
+	IKcpRtoDef     = 150
+	IKcpRtoMax     = 45000
 	IKcpCmdPush    = 81 // IKcpCmdPush:	Push data
 	IKcpCmdAck     = 82 // IKcpCmdAck:	Ack
 	IKcpCmdWask    = 83 // IKcpCmdWask:	Get Window Size
 	IKcpCmdWins    = 84 // IKcpCmdWins:	Set window Size
-	IKcpAskSend    = 1  // IKcpAskSend:	need to send IKcpCmdWask
-	IKcpAskTell    = 2  // IKcpAskTell:	need to send IKcpCmdWins
+	IKcpAskSend    = 1  // IKcpAskSend:	Need to send IKcpCmdWask
+	IKcpAskTell    = 2  // IKcpAskTell:	Need to send IKcpCmdWins
 	IKcpWndSnd     = 32
 	IKcpWndRcv     = 32
-	IKcpMtuDef     = 1400
+	IKcpMtuDef     = 9000
 	IKcpAckFast    = 3
 	IKcpInterval   = 100
 	IKcpOverhead   = 24
 	IKcpDeadLink   = 20
 	IKcpThreshInit = 2
 	IKcpThreshMin  = 2
-	IKcpProbeInit  = 7000   // 7s initial probe window
-	IKcpProbeLimit = 120000 // 120s hard probe timeout
+	IKcpProbeInit  = 5000	// 5s initial probe window
+	IKcpProbeLimit = 60000	// 60s hard probe timeout
 )
 
 type outputCallback func(
@@ -1288,8 +1290,8 @@ func (
 ) Check() uint32 {
 	current := KcpCurrentMs()
 	tsFlush := Kcp.tsFlush
-	tmFlush := int32(0x7FFFFFFF)
-	tmPacket := int32(0x7FFFFFFF)
+	tmFlush := int32(math.MaxInt32)
+	tmPacket := int32(math.MaxInt32)
 	minimal := uint32(0)
 	if Kcp.updated == 0 {
 		return current
@@ -1448,6 +1450,10 @@ func (
 }
 
 func init() {
+	// 8 Goroutines per CPU or hardware thread
+	if (runtime.GOMAXPROCS(runtime.NumCPU() * 8)) < (runtime.NumCPU() * 8) {
+	    _ = runtime.GOMAXPROCS(runtime.NumCPU() * 8)
+	}
 	// Register the MIT License
 	lkcp9Legal.RegisterLicense(
 		"\nThe MIT License (MIT)\n\nCopyright © 2015 Daniel Fu <daniel820313@gmail.com>.\nCopyright © 2019 Loki 'l0k18' Verloren <stalker.loki@protonmail.ch>.\nCopyright © 2020 Gridfinity, LLC. <admin@gridfinity.com>.\nCopyright © 2020 Jeffrey H. Johnson <jeff@gridfinity.com>.\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including, without limitation, the rights\nto use, copy, modify, merge, publish, distribute, sub-license, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice, and this permission notice, shall be\nincluded in all copies, or substantial portions, of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING, BUT NOT LIMITED TO, THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF, OR IN CONNECTION WITH THE SOFTWARE, OR THE USE OR OTHER DEALINGS IN\nTHE SOFTWARE.\n",

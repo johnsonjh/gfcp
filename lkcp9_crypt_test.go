@@ -12,8 +12,8 @@ package lkcp9_test
 
 import (
 	"bytes"
-	"crypto/aes"
-	"crypto/md5"
+	"fmt"
+	hh "github.com/minio/highwayhash"
 	"crypto/rand"
 	"hash/crc32"
 	"io"
@@ -24,66 +24,6 @@ import (
 	u "go.gridfinity.dev/leaktestfe"
 )
 
-func TestSM4(
-	t *testing.T,
-) {
-	defer u.Leakplug(
-		t,
-	)
-	bc, err := lkcp9.NewSM4BlockCrypt(
-		pass[:16],
-	)
-	if err != nil {
-		t.Fatal(
-			err,
-		)
-	}
-	cryptTest(
-		t,
-		bc,
-	)
-}
-
-func TestAES(
-	t *testing.T,
-) {
-	defer u.Leakplug(
-		t,
-	)
-	bc, err := lkcp9.NewAESBlockCrypt(
-		pass[:32],
-	)
-	if err != nil {
-		t.Fatal(
-			err,
-		)
-	}
-	cryptTest(
-		t,
-		bc,
-	)
-}
-
-func TestXOR(
-	t *testing.T,
-) {
-	defer u.Leakplug(
-		t,
-	)
-	bc, err := lkcp9.NewSimpleXORBlockCrypt(
-		pass[:32],
-	)
-	if err != nil {
-		t.Fatal(
-			err,
-		)
-	}
-	cryptTest(
-		t,
-		bc,
-	)
-}
-
 func TestNone(
 	t *testing.T,
 ) {
@@ -93,26 +33,6 @@ func TestNone(
 	bc, err := lkcp9.NewNoneBlockCrypt(pass[:32])
 	if err != nil {
 		t.Fatal(err)
-	}
-	cryptTest(
-		t,
-		bc,
-	)
-}
-
-func TestSalsa20(
-	t *testing.T,
-) {
-	defer u.Leakplug(
-		t,
-	)
-	bc, err := lkcp9.NewSalsa20BlockCrypt(
-		pass[:32],
-	)
-	if err != nil {
-		t.Fatal(
-			err,
-		)
 	}
 	cryptTest(
 		t,
@@ -155,78 +75,15 @@ func cryptTest(
 		data,
 		dec,
 	) {
+		t.Log(
+			fmt.Sprintf(
+				"\n	enc=%v\n	dec=%v",
+				enc,
+				dec,
+			),
+		)
 		t.Fail()
 	}
-}
-
-func BenchmarkSM4(b *testing.B) {
-	bc, err := lkcp9.NewSM4BlockCrypt(pass[:16])
-	if err != nil {
-		b.Fatal(err)
-	}
-	benchCrypt(b, bc)
-}
-
-func BenchmarkAES128(b *testing.B) {
-	bc, err := lkcp9.NewAESBlockCrypt(
-		pass[:16],
-	)
-	if err != nil {
-		b.Fatal(err)
-	}
-	benchCrypt(
-		b,
-		bc,
-	)
-}
-
-func BenchmarkAES192(b *testing.B) {
-	bc, err := lkcp9.NewAESBlockCrypt(
-		pass[:24],
-	)
-	if err != nil {
-		b.Fatal(
-			err,
-		)
-	}
-	benchCrypt(
-		b,
-		bc,
-	)
-}
-
-func BenchmarkAES256(
-	b *testing.B,
-) {
-	bc, err := lkcp9.NewAESBlockCrypt(
-		pass[:32],
-	)
-	if err != nil {
-		b.Fatal(
-			err,
-		)
-	}
-	benchCrypt(
-		b,
-		bc,
-	)
-}
-
-func BenchmarkXOR(
-	b *testing.B,
-) {
-	bc, err := lkcp9.NewSimpleXORBlockCrypt(
-		pass[:32],
-	)
-	if err != nil {
-		b.Fatal(
-			err,
-		)
-	}
-	benchCrypt(
-		b,
-		bc,
-	)
 }
 
 func BenchmarkNone(
@@ -237,19 +94,6 @@ func BenchmarkNone(
 	)
 	if err != nil {
 		b.Fatal(err)
-	}
-	benchCrypt(
-		b,
-		bc,
-	)
-}
-
-func BenchmarkSalsa20(b *testing.B) {
-	bc, err := lkcp9.NewSalsa20BlockCrypt(pass[:32])
-	if err != nil {
-		b.Fatal(
-			err,
-		)
 	}
 	benchCrypt(
 		b,
@@ -321,36 +165,37 @@ func BenchmarkCRC32(
 func BenchmarkCsprngSystem(
 	b *testing.B,
 ) {
-	data := make([]byte, md5.Size)
+	data := make([]byte, hh.Size)
 	b.SetBytes(int64(len(data)))
 	for i := 0; i < b.N; i++ {
 		io.ReadFull(rand.Reader, data)
 	}
 }
 
-func BenchmarkCsprngMD5(b *testing.B) {
-	var data [md5.Size]byte
+func BenchmarkCsprngHH(b *testing.B) {
+	var data [hh.Size]byte
 	b.SetBytes(
-		md5.Size,
+		hh.Size,
 	)
 	for i := 0; i < b.N; i++ {
-		data = md5.Sum(
+		data = hh.Sum(
+			data[:],
 			data[:],
 		)
 	}
 }
 
-func BenchmarkCsprngKcpNonceMD5(
+func BenchmarkCsprngKcpNonceHH(
 	b *testing.B,
 ) {
-	var ng lkcp9.KcpNonceMD5
+	var ng lkcp9.KcpNonceHH
 	ng.Init()
 	b.SetBytes(
-		md5.Size,
+		hh.Size,
 	)
 	data := make(
 		[]byte,
-		md5.Size,
+		hh.Size,
 	)
 	for i := 0; i < b.N; i++ {
 		ng.Fill(
@@ -359,21 +204,3 @@ func BenchmarkCsprngKcpNonceMD5(
 	}
 }
 
-func BenchmarkCsprngNonceAES128(
-	b *testing.B,
-) {
-	var ng lkcp9.KcpNonceAES128
-	ng.Init()
-	b.SetBytes(
-		aes.BlockSize,
-	)
-	data := make(
-		[]byte,
-		aes.BlockSize,
-	)
-	for i := 0; i < b.N; i++ {
-		ng.Fill(
-			data,
-		)
-	}
-}

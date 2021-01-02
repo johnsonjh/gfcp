@@ -11,9 +11,8 @@
 package lkcp9 // import "go.gridfinity.dev/lkcp9"
 
 import (
-	"crypto/aes"
-	"crypto/cipher"
-	"crypto/md5"
+	hh "github.com/minio/highwayhash"
+	//hh "crypto/md5"
 	"crypto/rand"
 	"io"
 )
@@ -26,20 +25,20 @@ type Entropy interface {
 	)
 }
 
-// KcpNonceMD5 ...
-type KcpNonceMD5 struct {
-	seed [md5.Size]byte
+// KcpNonceHH ...
+type KcpNonceHH struct {
+	seed [hh.Size]byte
 }
 
 // Init ...
 func (
-	n *KcpNonceMD5,
+	n *KcpNonceHH,
 ) Init() {
 }
 
 // Fill ...
 func (
-	n *KcpNonceMD5,
+	n *KcpNonceHH,
 ) Fill(
 	nonce []byte,
 ) {
@@ -53,64 +52,7 @@ func (
 			panic("io.ReadFull failure")
 		}
 	}
-	n.seed = md5.Sum(
-		n.seed[:],
-	)
-	copy(
-		nonce,
-		n.seed[:],
-	)
-}
-
-// KcpNonceAES128 ...
-type KcpNonceAES128 struct {
-	seed  [aes.BlockSize]byte
-	block cipher.Block
-}
-
-// Init ...
-func (
-	n *KcpNonceAES128,
-) Init() {
-	var err error
-	var key [16]byte
-	_, err = io.ReadFull(
-		rand.Reader,
-		key[:],
-	)
-	if err != nil {
-		panic("io.ReadFull failure")
-	}
-	_, err = io.ReadFull(
-		rand.Reader,
-		n.seed[:],
-	)
-	if err != nil {
-		panic("io.ReadFull failure")
-	}
-	block, _ := aes.NewCipher(
-		key[:],
-	)
-	n.block = block
-}
-
-// Fill ...
-func (
-	n *KcpNonceAES128,
-) Fill(
-	nonce []byte,
-) {
-	var err error
-	if n.seed[0] == 0 {
-		_, err = io.ReadFull(
-			rand.Reader,
-			n.seed[:],
-		)
-		if err != nil {
-			panic("io.ReadFull failure")
-		}
-	}
-	n.block.Encrypt(
+	n.seed = hh.Sum(
 		n.seed[:],
 		n.seed[:],
 	)

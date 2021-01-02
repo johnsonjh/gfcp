@@ -13,12 +13,25 @@ package lkcp9_test
 import (
 	"fmt"
 	"runtime"
-	"runtime/debug"
 	"testing"
 
 	u "go.gridfinity.dev/leaktestfe"
 	licn "go4.org/legal"
 )
+
+func TestArchitecture(
+	t *testing.T,
+) {
+	defer u.Leakplug(
+		t,
+	)
+    is64bit := uint64(^uintptr(0)) == ^uint64(0)
+    if !is64bit {
+        t.Fatal(
+			"Not 64-bit: Unsupported architecutre",
+        )
+    }
+}
 
 func TestGoEnvironment(
 	t *testing.T,
@@ -26,14 +39,15 @@ func TestGoEnvironment(
 	defer u.Leakplug(
 		t,
 	)
-	debug.FreeOSMemory()
 	t.Log(
 		fmt.Sprintf(
-			"\nGo ROOT=%v\nGo Version=%v\nGo GOMAXPROCS=%v\nGo NumCPU=%v",
-			runtime.GOROOT(),
-			runtime.Version(),
-			runtime.GOMAXPROCS(-1),
-			runtime.NumCPU(),
+			        "Built with %v (%v)for %v/%v\n%v logical CPUs, %v goroutines available",
+					runtime.Version(),
+				    runtime.Compiler,
+					runtime.GOOS,
+					runtime.GOARCH,
+					runtime.NumCPU(),
+					runtime.GOMAXPROCS(-1),
 		),
 	)
 }

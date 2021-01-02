@@ -19,7 +19,6 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"runtime"
-	"runtime/debug"
 	"sync"
 	"testing"
 	"time"
@@ -67,7 +66,7 @@ func dialEcho() (
 	*lkcp9.UDPSession,
 	error,
 ) {
-	block, _ := lkcp9.NewSalsa20BlockCrypt(
+	block, _ := lkcp9.NewNoneBlockCrypt(
 		pass,
 	)
 	sess, err := lkcp9.DialWithOptions(
@@ -124,8 +123,8 @@ func dialEcho() (
 	sess.SetDeadline(time.Now().Add(
 		time.Minute,
 	))
-	runtime.GC()
-	debug.FreeOSMemory()
+	
+	
 	return sess, err
 }
 
@@ -179,7 +178,7 @@ func dialTinyBufferEcho() (
 	*lkcp9.UDPSession,
 	error,
 ) {
-	block, _ := lkcp9.NewSalsa20BlockCrypt(
+	block, _ := lkcp9.NewNoneBlockCrypt(
 		pass,
 	)
 	sess, err := lkcp9.DialWithOptions(
@@ -193,7 +192,7 @@ func dialTinyBufferEcho() (
 			err,
 		)
 	}
-	runtime.GC()
+	
 	return sess, err
 }
 
@@ -201,11 +200,11 @@ func listenEcho() (
 	net.Listener,
 	error,
 ) {
-	block, _ := lkcp9.NewSalsa20BlockCrypt(
+	block, _ := lkcp9.NewNoneBlockCrypt(
 		pass,
 	)
-	runtime.GC()
-	debug.FreeOSMemory()
+	
+	
 	return lkcp9.ListenWithOptions(
 		portEcho,
 		block,
@@ -218,11 +217,11 @@ func listenTinyBufferEcho() (
 	net.Listener,
 	error,
 ) {
-	block, _ := lkcp9.NewSalsa20BlockCrypt(
+	block, _ := lkcp9.NewNoneBlockCrypt(
 		pass,
 	)
-	runtime.GC()
-	debug.FreeOSMemory()
+	
+	
 	return lkcp9.ListenWithOptions(
 		portTinyBufferEcho,
 		block,
@@ -235,8 +234,8 @@ func listenSink() (
 	net.Listener,
 	error,
 ) {
-	runtime.GC()
-	debug.FreeOSMemory()
+	
+	
 	return lkcp9.ListenWithOptions(
 		portSink,
 		nil,
@@ -267,8 +266,8 @@ func echoServer() {
 			go handleEcho(s.(*lkcp9.UDPSession))
 		}
 	}()
-	runtime.GC()
-	debug.FreeOSMemory()
+	
+	
 }
 
 func sinkServer() {
@@ -297,8 +296,8 @@ func sinkServer() {
 			go handleSink(s.(*lkcp9.UDPSession))
 		}
 	}()
-	runtime.GC()
-	debug.FreeOSMemory()
+	
+	
 }
 
 func tinyBufferEchoServer() {
@@ -317,8 +316,8 @@ func tinyBufferEchoServer() {
 			go handleTinyBufferEcho(s.(*lkcp9.UDPSession))
 		}
 	}()
-	runtime.GC()
-	debug.FreeOSMemory()
+	
+	
 }
 
 func handleEcho(
@@ -368,8 +367,8 @@ func handleEcho(
 		conn.Write(
 			buf[:n],
 		)
-		runtime.GC()
-		debug.FreeOSMemory()
+		
+		
 	}
 }
 
@@ -417,8 +416,8 @@ func handleSink(
 				err,
 			)
 		}
-		runtime.GC()
-		debug.FreeOSMemory()
+		
+		
 	}
 }
 
@@ -444,8 +443,8 @@ func handleTinyBufferEcho(
 		conn.Write(
 			buf[:n],
 		)
-		runtime.GC()
-		debug.FreeOSMemory()
+		
+		
 	}
 }
 
@@ -476,8 +475,8 @@ func TestTimeout(
 		t.Fail()
 	}
 	cli.Close()
-	runtime.GC()
-	debug.FreeOSMemory()
+	
+	
 }
 
 func TestSendRecv(
@@ -528,8 +527,8 @@ func TestSendRecv(
 		}
 	}
 	cli.Close()
-	runtime.GC()
-	debug.FreeOSMemory()
+	
+	
 }
 
 func TestSendVector(
@@ -594,8 +593,8 @@ func TestSendVector(
 		}
 	}
 	cli.Close()
-	runtime.GC()
-	debug.FreeOSMemory()
+	
+	
 }
 
 func TestTinyBufferReceiver(
@@ -673,8 +672,8 @@ func TestTinyBufferReceiver(
 		}
 	}
 	cli.Close()
-	runtime.GC()
-	debug.FreeOSMemory()
+	
+	
 }
 
 func TestClose(
@@ -710,39 +709,59 @@ func TestClose(
 		t.Fail()
 	}
 	cli.Close()
-	runtime.GC()
-	debug.FreeOSMemory()
+	
+	
 }
 
-func TestMassivelyParallel_Concurrent_2048_Clients_128_byte_Messages_128_Iterations(
+func TestParallel(
 	t *testing.T,
 ) {
+	var concurrent = 1024
 	if runtime.GOOS == "darwin" {
-		t.Log("Skipping stress test on OS X - runs out of files")
+		t.Log("--- WARN: Detected macOS: Lowering concurrency to 128")
+		concurrent = 128
 		return
 	}
-	runtime.GC()
-	debug.FreeOSMemory()
+	
+	t.Log(
+		fmt.Sprintf(
+			"--- INFO: Target concurrency: %v",
+			concurrent,
+		)
 	t.Parallel()
-	_ = runtime.GOMAXPROCS(runtime.NumCPU() * 16)
-	t.Log(fmt.Sprintf("Starting Goroutines=%v", runtime.NumGoroutine()))
+	t.Log(
+		fmt.Sprintf(
+			"Stage 1/2: Goroutines: %v",
+			runtime.NumGoroutine(),
+		)
+	)
 	defer u.Leakplug(
 		t,
 	)
 	var wg sync.WaitGroup
 	wg.Add(
-		2048,
+		concurrent,
 	)
-	for i := 0; i < 2048; i++ {
+	for i := 0; i < concurrent; i++ {
 		go parallel_client(
 			&wg,
 		)
 	}
-	t.Log(fmt.Sprintf("Activate Goroutines=%v", runtime.NumGoroutine()))
+	t.Log(
+		fmt.Sprintf(
+			"Stage 2/2: Goroutines: %v",
+			runtime.NumGoroutine(),
+		)
+	)
 	wg.Wait()
-	t.Log(fmt.Sprintf("Utilized Goroutines=%v", runtime.NumGoroutine()))
-	runtime.GC()
-	debug.FreeOSMemory()
+	t.Log(
+		fmt.Sprintf(
+			"Stage 2/3: Goroutines: %v",
+			runtime.NumGoroutine(),
+		)
+	)
+	
+	
 }
 
 func parallel_client(
@@ -759,12 +778,12 @@ func parallel_client(
 
 	err = echo_tester(
 		cli,
-		128,
-		128,
+		64,
+		64,
 	)
 	wg.Done()
-	runtime.GC()
-	debug.FreeOSMemory()
+	
+	
 	return
 }
 
@@ -775,8 +794,8 @@ func BenchmarkEchoSpeed4K(
 		b,
 		4096,
 	)
-	runtime.GC()
-	debug.FreeOSMemory()
+	
+	
 }
 
 func BenchmarkEchoSpeed64K(
@@ -786,8 +805,8 @@ func BenchmarkEchoSpeed64K(
 		b,
 		65536,
 	)
-	runtime.GC()
-	debug.FreeOSMemory()
+	
+	
 }
 
 func BenchmarkEchoSpeed512K(
@@ -796,8 +815,8 @@ func BenchmarkEchoSpeed512K(
 	speedclient(b,
 		524288,
 	)
-	runtime.GC()
-	debug.FreeOSMemory()
+	
+	
 }
 
 func BenchmarkEchoSpeed1M(
@@ -807,8 +826,8 @@ func BenchmarkEchoSpeed1M(
 		b,
 		1048576,
 	)
-	runtime.GC()
-	debug.FreeOSMemory()
+	
+	
 }
 
 func speedclient(
@@ -833,8 +852,6 @@ func speedclient(
 	b.SetBytes(
 		int64(nbytes),
 	)
-	runtime.GC()
-	debug.FreeOSMemory()
 }
 
 func BenchmarkSinkSpeed4K(
@@ -842,10 +859,10 @@ func BenchmarkSinkSpeed4K(
 ) {
 	sinkclient(
 		b,
-		4096,
+		4 * 1024,
 	)
-	runtime.GC()
-	debug.FreeOSMemory()
+	
+	
 }
 
 func BenchmarkSinkSpeed64K(
@@ -853,10 +870,8 @@ func BenchmarkSinkSpeed64K(
 ) {
 	sinkclient(
 		b,
-		65536,
+		64 * 1024,
 	)
-	runtime.GC()
-	debug.FreeOSMemory()
 }
 
 func BenchmarkSinkSpeed256K(
@@ -864,10 +879,8 @@ func BenchmarkSinkSpeed256K(
 ) {
 	sinkclient(
 		b,
-		524288,
+		256 * 1024,
 	)
-	runtime.GC()
-	debug.FreeOSMemory()
 }
 
 func BenchmarkSinkSpeed1M(
@@ -875,10 +888,8 @@ func BenchmarkSinkSpeed1M(
 ) {
 	sinkclient(
 		b,
-		1048576,
+		1 * 1024 * 1024,
 	)
-	runtime.GC()
-	debug.FreeOSMemory()
 }
 
 func sinkclient(
@@ -892,7 +903,6 @@ func sinkclient(
 			err,
 		)
 	}
-
 	sink_tester(
 		cli,
 		nbytes,
@@ -901,8 +911,6 @@ func sinkclient(
 	b.SetBytes(
 		int64(nbytes),
 	)
-	runtime.GC()
-	debug.FreeOSMemory()
 }
 
 func echo_tester(
@@ -935,7 +943,6 @@ func echo_tester(
 			}
 		}
 	}
-	runtime.GC()
 	return nil
 }
 
@@ -955,8 +962,6 @@ func sink_tester(
 			return err
 		}
 	}
-	runtime.GC()
-	debug.FreeOSMemory()
 	return nil
 }
 
@@ -979,8 +984,6 @@ func TestSnsi(
 	t.Log(
 		lkcp9.DefaultSnsi.ToSlice(),
 	)
-	runtime.GC()
-	debug.FreeOSMemory()
 }
 
 func TestListenerClose(
@@ -996,42 +999,37 @@ func TestListenerClose(
 		3,
 	)
 	if err != nil {
-		runtime.GC()
-		debug.FreeOSMemory()
 		t.Fail()
 	}
 	l.SetReadDeadline(
 		time.Now().Add(
 			time.Second,
-		))
+		)
+	)
 	l.SetWriteDeadline(
 		time.Now().Add(
 			time.Second,
-		))
+		)
+	)
 	l.SetDeadline(
 		time.Now().Add(
 			time.Second,
-		))
+		)
+	)
 	time.Sleep(
 		2 * time.Second,
 	)
 	if _, err := l.Accept(); err == nil {
 		t.Fail()
 	}
-	runtime.GC()
-	debug.FreeOSMemory()
 	l.Close()
 	fakeaddr, _ := net.ResolveUDPAddr(
 		"udp6",
-		"127.0.0.1:1111",
+		"127.0.0.1:7162",
 	)
 	if l.CloseSession(
 		fakeaddr,
 	) {
-		runtime.GC()
-		debug.FreeOSMemory()
 		t.Fail()
 	}
-	runtime.GC()
-	debug.FreeOSMemory()
 }
