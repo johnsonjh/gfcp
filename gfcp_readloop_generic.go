@@ -10,7 +10,7 @@
 
 // +build !linux
 
-package lkcp9 // import "go.gridfinity.dev/lkcp9"
+package gfcp // import "go.gridfinity.dev/gfcp"
 
 import (
 	"sync/atomic"
@@ -21,7 +21,7 @@ func (
 ) readLoop() {
 	buf := make(
 		[]byte,
-		KcpMtuLimit,
+		GFcpMtuLimit,
 	)
 	var src string
 	for {
@@ -32,18 +32,18 @@ func (
 				src = addr.String()
 			} else if addr.String() != src {
 				atomic.AddUint64(
-					&DefaultSnsi.KcpInputErrors,
+					&DefaultSnsi.GFcpInputErrors,
 					1,
 				)
 				continue
 			}
-			if n >= s.headerSize+IKcpOverhead {
+			if n >= s.headerSize+GfcpOverhead {
 				s.packetInput(
 					buf[:n],
 				)
 			} else {
 				atomic.AddUint64(
-					&DefaultSnsi.KcpInputErrors,
+					&DefaultSnsi.GFcpInputErrors,
 					1,
 				)
 			}
@@ -59,20 +59,20 @@ func (
 ) monitor() {
 	buf := make(
 		[]byte,
-		KcpMtuLimit,
+		GFcpMtuLimit,
 	)
 	for {
 		if n, from, err := l.conn.ReadFrom(
 			buf,
 		); err == nil {
-			if n >= l.headerSize+IKcpOverhead {
+			if n >= l.headerSize+GfcpOverhead {
 				l.packetInput(
 					buf[:n],
 					from,
 				)
 			} else {
 				atomic.AddUint64(
-					&DefaultSnsi.KcpInputErrors,
+					&DefaultSnsi.GFcpInputErrors,
 					1,
 				)
 			}

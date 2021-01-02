@@ -8,7 +8,7 @@
 // All use of this code is governed by the MIT license.
 // The complete license is available in the LICENSE file.
 
-package lkcp9 // import "go.gridfinity.dev/lkcp9"
+package gfcp // import "go.gridfinity.dev/gfcp"
 
 import (
 	"container/heap"

@@ -10,7 +10,7 @@
 
 // +build linux
 
-package lkcp9 // import "go.gridfinity.dev/lkcp9"
+package gfcp // import "go.gridfinity.dev/gfcp"
 
 import (
 	"net"
@@ -50,7 +50,7 @@ func (
 		msgs[k].Buffers = [][]byte{
 			make(
 				[]byte,
-				KcpMtuLimit,
+				GFcpMtuLimit,
 			),
 		}
 	}
@@ -68,14 +68,14 @@ func (
 					src = msg.Addr.String()
 				} else if msg.Addr.String() != src {
 					atomic.AddUint64(
-						&DefaultSnsi.KcpPreInputErrors,
+						&DefaultSnsi.GFcpPreInputErrors,
 						1,
 					)
 					continue
 				}
-				if msg.N < s.headerSize+IKcpOverhead {
+				if msg.N < s.headerSize+GfcpOverhead {
 					atomic.AddUint64(
-						&DefaultSnsi.KcpInputErrors,
+						&DefaultSnsi.GFcpInputErrors,
 						1,
 					)
 					continue
@@ -102,7 +102,7 @@ func (
 	for k := range msgs {
 		msgs[k].Buffers = [][]byte{make(
 			[]byte,
-			KcpMtuLimit,
+			GFcpMtuLimit,
 		)}
 	}
 	conn := ipv4.NewPacketConn(
@@ -119,14 +119,14 @@ func (
 					src = msg.Addr.String()
 				} else if msg.Addr.String() != src {
 					atomic.AddUint64(
-						&DefaultSnsi.KcpInputErrors,
+						&DefaultSnsi.GFcpInputErrors,
 						1,
 					)
 					continue
 				}
-				if msg.N < s.headerSize+IKcpOverhead {
+				if msg.N < s.headerSize+GfcpOverhead {
 					atomic.AddUint64(
-						&DefaultSnsi.KcpInputErrors,
+						&DefaultSnsi.GFcpInputErrors,
 						1,
 					)
 					continue
@@ -166,7 +166,7 @@ func (
 	for k := range msgs {
 		msgs[k].Buffers = [][]byte{make(
 			[]byte,
-			KcpMtuLimit,
+			GFcpMtuLimit,
 		)}
 	}
 	conn := ipv4.NewPacketConn(
@@ -179,14 +179,14 @@ func (
 		); err == nil {
 			for i := 0; i < count; i++ {
 				msg := &msgs[i]
-				if msg.N >= l.headerSize+IKcpOverhead {
+				if msg.N >= l.headerSize+GfcpOverhead {
 					l.packetInput(
 						msg.Buffers[0][:msg.N],
 						msg.Addr,
 					)
 				} else {
 					atomic.AddUint64(
-						&DefaultSnsi.KcpInputErrors,
+						&DefaultSnsi.GFcpInputErrors,
 						1,
 					)
 				}
@@ -207,7 +207,7 @@ func (
 	for k := range msgs {
 		msgs[k].Buffers = [][]byte{make(
 			[]byte,
-			KcpMtuLimit,
+			GFcpMtuLimit,
 		)}
 	}
 	conn := ipv4.NewPacketConn(
@@ -220,14 +220,14 @@ func (
 		); err == nil {
 			for i := 0; i < count; i++ {
 				msg := &msgs[i]
-				if msg.N >= l.headerSize+IKcpOverhead {
+				if msg.N >= l.headerSize+GfcpOverhead {
 					l.packetInput(
 						msg.Buffers[0][:msg.N],
 						msg.Addr,
 					)
 				} else {
 					atomic.AddUint64(
-						&DefaultSnsi.KcpInputErrors,
+						&DefaultSnsi.GFcpInputErrors,
 						1,
 					)
 				}

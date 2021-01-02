@@ -1,8 +1,10 @@
-# lkcp9
+# gfcp
 
-## A high-speed implementation of the KCP transport for Go
+## Gridfinity Control Protocol
 
-[![CodebeatBadge](https://codebeat.co/badges/43195211-7e9f-4454-a0ed-b2186946252b)](https://codebeat.co/projects/github-com-gridfinity-lkcp9-master)
+### A high-speed variant of the KCP transport for Go
+
+[![CodebeatBadge](https://codebeat.co/badges/43195211-7e9f-4454-a0ed-b2186946252b)](https://codebeat.co/projects/github-com-gridfinity-gfcp-master)
 
 ------------------------
 
@@ -10,22 +12,22 @@
 
 #### Go Modules
 
-* [go.gridfinity.dev](https://go.gridfinity.dev/lkcp9)
+* [go.gridfinity.dev](https://go.gridfinity.dev/gfcp)
 * [go.gridfinity.com](https://go.gridfinity.com)
 
 #### Source Code
 
-* [Gridfinity GitHub](https://gitlab.gridfinity.com/go/lkcp9)
-* [SourceHut](https://sr.ht/~trn/lkcp9)
-* [GitHub](https://github.com/gridfinity/lkcp9)
+* [Gridfinity GitHub](https://gitlab.gridfinity.com/go/gfcp)
+* [SourceHut](https://sr.ht/~trn/gfcp)
+* [GitHub](https://github.com/gridfinity/gfcp)
 
 ### Issue Tracking
 
-* [Gridfinity GitLab Issues](https://gitlab.gridfinity.com/go/lkcp9/-/issues)
+* [Gridfinity GitLab Issues](https://gitlab.gridfinity.com/go/gfcp/-/issues)
 
 ### Security Policy
 
-* [Security Policy and Vulnerability Reporting](https://gitlab.gridfinity.com/go/lkcp9/-/blob/master/SECURITY.md)
+* [Security Policy and Vulnerability Reporting](https://gitlab.gridfinity.com/go/gfcp/-/blob/master/SECURITY.md)
 
 ### Original Authors
 
@@ -34,4 +36,4 @@
 
 ### License
 
-* [The MIT License](https://gitlab.gridfinity.com/go/lkcp9/-/blob/master/LICENSE)
+* [The MIT License](https://gitlab.gridfinity.com/go/gfcp/-/blob/master/LICENSE)

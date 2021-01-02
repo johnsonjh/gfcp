@@ -4,25 +4,26 @@
 
 * Only the most recent current release is ***SUPPORTED***.**☨**
 
-    [![GitHubRelease](https://img.shields.io/github/release/gridfinity/lkcp9.svg)](https://github.com/gridfinity/lkcp9/releases/)
+    [![GitHubRelease](https://img.shields.io/github/release/gridfinity/gfcp.svg)](https://github.com/gridfinity/gfcp/releases/)
 
 * **☨** Support is offered on a **best-effort** basis **ONLY**.
 
 ```text
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF, OR IN CONNECTION WITH THE SOFTWARE, OR THE USE OR OTHER DEALINGS IN 
-THE SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+KIND, EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
+THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE
+SOFTWARE, OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
 * Pre-release versions and past releases are ***NOT SUPPORTED***.
 
 ## Report a security vulnerability
 
-* Create a new issue at [Gridfinity GitLab](https://gitlab.gridfinity.com/gridfinity/lkcp9/-/issues)
+* Create a new issue at [Gridfinity GitLab](https://gitlab.gridfinity.com/gridfinity/gfcp/-/issues)
   * Check "*This issue is confidential and should only be visible to team members with at least Reporter access.*"
 
   * Or, send a **PGP-encrypted** email to <mailto:jeff@gridfinity.com>

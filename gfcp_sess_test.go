@@ -8,7 +8,7 @@
 // All use of this code is governed by the MIT license.
 // The complete license is available in the LICENSE file.
 
-package lkcp9_test
+package gfcp_test
 
 import (
 	"fmt"
@@ -23,8 +23,8 @@ import (
 	"testing"
 	"time"
 
+	"go.gridfinity.dev/gfcp"
 	u "go.gridfinity.dev/leaktestfe"
-	"go.gridfinity.dev/lkcp9"
 	"golang.org/x/crypto/pbkdf2"
 )
 
@@ -63,15 +63,11 @@ func init() {
 }
 
 func dialEcho() (
-	*lkcp9.UDPSession,
+	*gfcp.UDPSession,
 	error,
 ) {
-	block, _ := lkcp9.NewNoneBlockCrypt(
-		pass,
-	)
-	sess, err := lkcp9.DialWithOptions(
+	sess, err := gfcp.DialWithOptions(
 		portEcho,
-		block,
 		10,
 		3,
 	)
@@ -133,12 +129,11 @@ func dialEcho() (
 }
 
 func dialSink() (
-	*lkcp9.UDPSession,
+	*gfcp.UDPSession,
 	error,
 ) {
-	sess, err := lkcp9.DialWithOptions(
+	sess, err := gfcp.DialWithOptions(
 		portSink,
-		nil,
 		0,
 		0,
 	)
@@ -183,15 +178,11 @@ func dialSink() (
 }
 
 func dialTinyBufferEcho() (
-	*lkcp9.UDPSession,
+	*gfcp.UDPSession,
 	error,
 ) {
-	block, _ := lkcp9.NewNoneBlockCrypt(
-		pass,
-	)
-	sess, err := lkcp9.DialWithOptions(
+	sess, err := gfcp.DialWithOptions(
 		portTinyBufferEcho,
-		block,
 		10,
 		3,
 	)
@@ -208,13 +199,8 @@ func listenEcho() (
 	net.Listener,
 	error,
 ) {
-	block, _ := lkcp9.NewNoneBlockCrypt(
-		pass,
-	)
-
-	return lkcp9.ListenWithOptions(
+	return gfcp.ListenWithOptions(
 		portEcho,
-		block,
 		10,
 		3,
 	)
@@ -224,13 +210,8 @@ func listenTinyBufferEcho() (
 	net.Listener,
 	error,
 ) {
-	block, _ := lkcp9.NewNoneBlockCrypt(
-		pass,
-	)
-
-	return lkcp9.ListenWithOptions(
+	return gfcp.ListenWithOptions(
 		portTinyBufferEcho,
-		block,
 		10,
 		3,
 	)
@@ -240,9 +221,8 @@ func listenSink() (
 	net.Listener,
 	error,
 ) {
-	return lkcp9.ListenWithOptions(
+	return gfcp.ListenWithOptions(
 		portSink,
-		nil,
 		0,
 		0,
 	)
@@ -256,14 +236,14 @@ func echoServer() {
 		)
 	}
 	go func() {
-		Kcplistener := l.(*lkcp9.Listener)
-		Kcplistener.SetReadBuffer(
+		GFcplistener := l.(*gfcp.Listener)
+		GFcplistener.SetReadBuffer(
 			4 * 1024 * 1024,
 		)
-		Kcplistener.SetWriteBuffer(
+		GFcplistener.SetWriteBuffer(
 			4 * 1024 * 1024,
 		)
-		Kcplistener.SetDSCP(
+		GFcplistener.SetDSCP(
 			46,
 		)
 		for {
@@ -271,13 +251,13 @@ func echoServer() {
 			if err != nil {
 				return
 			}
-			s.(*lkcp9.UDPSession).SetReadBuffer(
+			s.(*gfcp.UDPSession).SetReadBuffer(
 				4 * 1024 * 1024,
 			)
-			s.(*lkcp9.UDPSession).SetWriteBuffer(
+			s.(*gfcp.UDPSession).SetWriteBuffer(
 				4 * 1024 * 1024,
 			)
-			go handleEcho(s.(*lkcp9.UDPSession))
+			go handleEcho(s.(*gfcp.UDPSession))
 		}
 	}()
 }
@@ -290,14 +270,14 @@ func sinkServer() {
 		)
 	}
 	go func() {
-		Kcplistener := l.(*lkcp9.Listener)
-		Kcplistener.SetReadBuffer(
+		GFcplistener := l.(*gfcp.Listener)
+		GFcplistener.SetReadBuffer(
 			4 * 1024 * 1024,
 		)
-		Kcplistener.SetWriteBuffer(
+		GFcplistener.SetWriteBuffer(
 			4 * 1024 * 1024,
 		)
-		Kcplistener.SetDSCP(
+		GFcplistener.SetDSCP(
 			46,
 		)
 		for {
@@ -305,7 +285,7 @@ func sinkServer() {
 			if err != nil {
 				return
 			}
-			go handleSink(s.(*lkcp9.UDPSession))
+			go handleSink(s.(*gfcp.UDPSession))
 		}
 	}()
 }
@@ -323,13 +303,13 @@ func tinyBufferEchoServer() {
 			if err != nil {
 				return
 			}
-			go handleTinyBufferEcho(s.(*lkcp9.UDPSession))
+			go handleTinyBufferEcho(s.(*gfcp.UDPSession))
 		}
 	}()
 }
 
 func handleEcho(
-	conn *lkcp9.UDPSession,
+	conn *gfcp.UDPSession,
 ) {
 	conn.SetStreamMode(
 		true,
@@ -384,7 +364,7 @@ func handleEcho(
 }
 
 func handleSink(
-	conn *lkcp9.UDPSession,
+	conn *gfcp.UDPSession,
 ) {
 	conn.SetStreamMode(
 		true,
@@ -436,7 +416,7 @@ func handleSink(
 }
 
 func handleTinyBufferEcho(
-	conn *lkcp9.UDPSession,
+	conn *gfcp.UDPSession,
 ) {
 	conn.SetStreamMode(
 		true,
@@ -730,20 +710,20 @@ func TestParallel(
 	concurrent := 1024
 	if runtime.GOOS == "darwin" {
 		t.Log(
-			"\n--- WARN: Detected macOS: Lowering concurrency to 128",
+			"\n--- WARN: Running on macOS: Retargetting concurrency:\t128",
 		)
 		concurrent = 128
 	}
 	t.Log(
 		fmt.Sprintf(
-			"\n--- INFO: Target concurrency: %v",
+			"\n--- INFO: Target concurrency:\t%v",
 			concurrent,
 		),
 	)
 	t.Parallel()
 	t.Log(
 		fmt.Sprintf(
-			"\tStage 1/2:tGoroutines: %v",
+			"\tStage 1/2:\tGoroutines:\t%v",
 			runtime.NumGoroutine(),
 		),
 	)
@@ -761,14 +741,14 @@ func TestParallel(
 	}
 	t.Log(
 		fmt.Sprintf(
-			"\tStage 2/2:\tGoroutines: %v",
+			"\tStage 2/2:\tGoroutines:\t%v",
 			runtime.NumGoroutine(),
 		),
 	)
 	wg.Wait()
 	t.Log(
 		fmt.Sprintf(
-			"\tStage 2/3:\tGoroutines: %v",
+			"\tStage 2/3:\tGoroutines:\t%v",
 			runtime.NumGoroutine(),
 		),
 	)
@@ -1023,7 +1003,7 @@ func echo_tester(
 }
 
 func sink_tester(
-	cli *lkcp9.UDPSession,
+	cli *gfcp.UDPSession,
 	msglen,
 	msgcount int,
 ) error {
@@ -1048,17 +1028,17 @@ func TestSnsi(
 		t,
 	)
 	t.Log(
-		*lkcp9.DefaultSnsi.Copy(),
+		*gfcp.DefaultSnsi.Copy(),
 	)
 	t.Log(
-		lkcp9.DefaultSnsi.Header(),
+		gfcp.DefaultSnsi.Header(),
 	)
 	t.Log(
-		lkcp9.DefaultSnsi.ToSlice(),
+		gfcp.DefaultSnsi.ToSlice(),
 	)
-	lkcp9.DefaultSnsi.Reset()
+	gfcp.DefaultSnsi.Reset()
 	t.Log(
-		lkcp9.DefaultSnsi.ToSlice(),
+		gfcp.DefaultSnsi.ToSlice(),
 	)
 }
 
@@ -1068,9 +1048,8 @@ func TestListenerClose(
 	defer u.Leakplug(
 		t,
 	)
-	l, err := lkcp9.ListenWithOptions(
+	l, err := gfcp.ListenWithOptions(
 		portListerner,
-		nil,
 		10,
 		3,
 	)

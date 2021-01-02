@@ -8,7 +8,7 @@
 // All use of this code is governed by the MIT license.
 // The complete license is available in the LICENSE file.
 
-package lkcp9_test
+package gfcp_test
 
 import (
 	"fmt"
@@ -54,7 +54,7 @@ func TestGoEnvironment(
 	)
 }
 
-func TestLKcp9License(
+func TestGFcpLicense(
 	t *testing.T,
 ) {
 	defer u.Leakplug(
@@ -65,7 +65,7 @@ func TestLKcp9License(
 		licenses,
 	) == 0 {
 		t.Fatal(
-			"\n\nlkcp9_license_test.TestLKcp9License FAILURE",
+			"\n\ngfcp_license_test.TestGFcpLicense FAILURE",
 		)
 	} else {
 		t.Log(

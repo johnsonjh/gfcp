@@ -8,13 +8,12 @@
 // All use of this code is governed by the MIT license.
 // The complete license is available in the LICENSE file.
 
-package lkcp9 // import "go.gridfinity.dev/lkcp9"
+package gfcp // import "go.gridfinity.dev/gfcp"
 
 import (
 	"crypto/rand"
 	"encoding/binary"
 	"fmt"
-	"hash/crc32"
 	"net"
 	"sync"
 	"sync/atomic"
@@ -51,8 +50,8 @@ const (
 	nonceSize       = 16
 	crcSize         = 4
 	cryptHeaderSize = nonceSize + crcSize
-	// KcpMtuLimit ...
-	KcpMtuLimit   = 9000
+	// GFcpMtuLimit ...
+	GFcpMtuLimit  = 9000
 	rxFECMulti    = 3
 	acceptBacklog = 256
 )
@@ -69,7 +68,7 @@ func init() {
 	KxmitBuf.New = func() interface{} {
 		return make(
 			[]byte,
-			KcpMtuLimit,
+			GFcpMtuLimit,
 		)
 	}
 }
@@ -79,9 +78,8 @@ type (
 	UDPSession struct {
 		updaterIdx int            // record slice index in updater
 		conn       net.PacketConn // the underlying packet connection
-		Kcp        *KCP           // KCP ARQ protocol
+		GFcp       *GFCP          // GFCP ARQ protocol
 		l          *Listener      // pointing to the Listener object if it's been accepted by a Listener
-		block      BlockCrypt     // block encryption object
 		recvbuf    []byte
 		bufptr     []byte
 		// FecDecoder ...
@@ -91,9 +89,9 @@ type (
 		remote       net.Addr      // remote peer address
 		rd           time.Time     // read deadline
 		wd           time.Time     // write deadline
-		headerSize   int           // the header size additional to a KCP frame
+		headerSize   int           // the header size additional to a GFCP frame
 		ackNoDelay   bool          // send ack immediately for each incoming packet(testing purpose)
-		writeDelay   bool          // delay Kcp.flush() for Write() for bulk transfer
+		writeDelay   bool          // delay GFcp.flush() for Write() for bulk transfer
 		dup          int           // duplicate udp packets(testing purpose)
 		die          chan struct{} // notify current session has Closed
 		chReadEvent  chan struct{} // notify Read() can be called without blocking
@@ -126,7 +124,6 @@ func newUDPSession(
 	l *Listener,
 	conn net.PacketConn,
 	remote net.Addr,
-	block BlockCrypt,
 ) *UDPSession {
 	sess := new(
 		UDPSession,
@@ -135,7 +132,7 @@ func newUDPSession(
 		chan struct{},
 	)
 	sess.nonce = new(
-		KcpNonce,
+		GFcpNonce,
 	)
 	sess.nonce.Init()
 	sess.chReadEvent = make(
@@ -157,46 +154,34 @@ func newUDPSession(
 	sess.remote = remote
 	sess.conn = conn
 	sess.l = l
-	sess.block = block
 	sess.recvbuf = make(
 		[]byte,
-		KcpMtuLimit,
+		GFcpMtuLimit,
 	)
-	sess.FecDecoder = KcpNewDECDecoder(
+	sess.FecDecoder = GFcpNewDECDecoder(
 		rxFECMulti*(dataShards+parityShards),
 		dataShards,
 		parityShards,
 	)
-	if sess.block != nil {
-		sess.FecEncoder = KcpNewDECEncoder(
-			dataShards,
-			parityShards,
-			cryptHeaderSize,
-		)
-	} else {
-		sess.FecEncoder = KcpNewDECEncoder(
-			dataShards,
-			parityShards,
-			0,
-		)
-	}
-	if sess.block != nil {
-		sess.headerSize += cryptHeaderSize
-	}
+	sess.FecEncoder = GFcpNewDECEncoder(
+		dataShards,
+		parityShards,
+		0,
+	)
 	if sess.FecEncoder != nil {
 		sess.headerSize += fecHeaderSizePlus2
 	}
-	sess.Kcp = NewKCP(conv, func(
+	sess.GFcp = NewGFCP(conv, func(
 		buf []byte,
 		size int,
 	) {
-		if size >= IKcpOverhead+sess.headerSize {
+		if size >= GfcpOverhead+sess.headerSize {
 			sess.output(
 				buf[:size],
 			)
 		}
 	})
-	sess.Kcp.ReserveBytes(
+	sess.GFcp.ReserveBytes(
 		sess.headerSize,
 	)
 	updater.addSession(
@@ -205,25 +190,25 @@ func newUDPSession(
 	if sess.l == nil {
 		go sess.readLoop()
 		atomic.AddUint64(
-			&DefaultSnsi.KcpActiveOpen,
+			&DefaultSnsi.GFcpActiveOpen,
 			1,
 		)
 	} else {
 		atomic.AddUint64(
-			&DefaultSnsi.KcpPassiveOpen,
+			&DefaultSnsi.GFcpPassiveOpen,
 			1,
 		)
 	}
 	currestab := atomic.AddUint64(
-		&DefaultSnsi.KcpNowEstablished,
+		&DefaultSnsi.GFcpNowEstablished,
 		1,
 	)
 	maxconn := atomic.LoadUint64(
-		&DefaultSnsi.MaxConn,
+		&DefaultSnsi.GFcpMaxConn,
 	)
 	if currestab > maxconn {
 		atomic.CompareAndSwapUint64(
-			&DefaultSnsi.MaxConn,
+			&DefaultSnsi.GFcpMaxConn,
 			maxconn,
 			currestab,
 		)
@@ -253,7 +238,7 @@ func (
 			s.bufptr = s.bufptr[n:]
 			s.mu.Unlock()
 			atomic.AddUint64(
-				&DefaultSnsi.KcpBytesReceived,
+				&DefaultSnsi.GFcpBytesReceived,
 				uint64(n),
 			)
 			return n, nil
@@ -264,14 +249,14 @@ func (
 				errBrokenPipe,
 			)
 		}
-		if size := s.Kcp.PeekSize(); size > 0 {
+		if size := s.GFcp.PeekSize(); size > 0 {
 			if len(b) >= size {
-				s.Kcp.Recv(
+				s.GFcp.Recv(
 					b,
 				)
 				s.mu.Unlock()
 				atomic.AddUint64(
-					&DefaultSnsi.KcpBytesReceived,
+					&DefaultSnsi.GFcpBytesReceived,
 					uint64(size),
 				)
 				return size, nil
@@ -285,7 +270,7 @@ func (
 				)
 			}
 			s.recvbuf = s.recvbuf[:size]
-			s.Kcp.Recv(
+			s.GFcp.Recv(
 				s.recvbuf,
 			)
 			n = copy(
@@ -295,7 +280,7 @@ func (
 			s.bufptr = s.recvbuf[n:]
 			s.mu.Unlock()
 			atomic.AddUint64(
-				&DefaultSnsi.KcpBytesReceived,
+				&DefaultSnsi.GFcpBytesReceived,
 				uint64(n),
 			)
 			return n, nil
@@ -367,8 +352,8 @@ func (
 				)
 		}
 
-		if s.Kcp.WaitSnd() < int(
-			s.Kcp.sndWnd,
+		if s.GFcp.WaitSnd() < int(
+			s.GFcp.sndWnd,
 		) {
 			for _, b := range v {
 				n += len(
@@ -377,30 +362,30 @@ func (
 					if len(
 						b,
 					) <= int(
-						s.Kcp.mss,
+						s.GFcp.mss,
 					) {
-						s.Kcp.Send(
+						s.GFcp.Send(
 							b,
 						)
 						break
 					}
-					s.Kcp.Send(
-						b[:s.Kcp.mss],
+					s.GFcp.Send(
+						b[:s.GFcp.mss],
 					)
-					b = b[s.Kcp.mss:]
+					b = b[s.GFcp.mss:]
 				}
 			}
 
-			if s.Kcp.WaitSnd() >= int(
-				s.Kcp.sndWnd,
+			if s.GFcp.WaitSnd() >= int(
+				s.GFcp.sndWnd,
 			) || !s.writeDelay {
-				s.Kcp.Flush(
+				s.GFcp.Flush(
 					false,
 				)
 			}
 			s.mu.Unlock()
 			atomic.AddUint64(
-				&DefaultSnsi.KcpBytesSent,
+				&DefaultSnsi.GFcpBytesSent,
 				uint64(
 					n,
 				),
@@ -468,7 +453,7 @@ func (
 	)
 	s.isClosed = true
 	atomic.AddUint64(
-		&DefaultSnsi.KcpNowEstablished,
+		&DefaultSnsi.GFcpNowEstablished,
 		^uint64(
 			0,
 		),
@@ -557,7 +542,7 @@ func (
 ) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.Kcp.WndSize(
+	s.GFcp.WndSize(
 		sndwnd,
 		rcvwnd,
 	)
@@ -570,12 +555,12 @@ func (
 ) SetMtu(
 	mtu int,
 ) bool {
-	if mtu > KcpMtuLimit {
+	if mtu > GFcpMtuLimit {
 		return false
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.Kcp.SetMtu(
+	s.GFcp.SetMtu(
 		mtu,
 	)
 	return true
@@ -588,9 +573,9 @@ func (s *UDPSession) SetStreamMode(
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if enable {
-		s.Kcp.stream = 1
+		s.GFcp.stream = 1
 	} else {
-		s.Kcp.stream = 0
+		s.GFcp.stream = 0
 	}
 }
 
@@ -606,7 +591,7 @@ func (
 	s.ackNoDelay = nodelay
 }
 
-// SetDUP duplicates UDP packets for Kcp output.
+// SetDUP duplicates UDP packets for GFcp output.
 // Useful for testing, not for normal use.
 func (
 	s *UDPSession,
@@ -618,7 +603,7 @@ func (
 	s.dup = dup
 }
 
-// SetNoDelay sets TCP_DELAY, for Kcp.
+// SetNoDelay sets TCP_DELAY, for GFcp.
 func (
 	s *UDPSession,
 ) SetNoDelay(
@@ -629,7 +614,7 @@ func (
 ) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.Kcp.NoDelay(
+	s.GFcp.NoDelay(
 		nodelay,
 		interval,
 		resend,
@@ -724,38 +709,6 @@ func (
 			buf,
 		)
 	}
-	if s.block != nil {
-		s.nonce.Fill(
-			buf[:nonceSize],
-		)
-		checksum := crc32.ChecksumIEEE(
-			buf[cryptHeaderSize:],
-		)
-		binary.LittleEndian.PutUint32(
-			buf[nonceSize:],
-			checksum,
-		)
-		s.block.Encrypt(
-			buf,
-			buf,
-		)
-		for k := range ecc {
-			s.nonce.Fill(
-				ecc[k][:nonceSize],
-			)
-			checksum := crc32.ChecksumIEEE(
-				ecc[k][cryptHeaderSize:],
-			)
-			binary.LittleEndian.PutUint32(
-				ecc[k][nonceSize:],
-				checksum,
-			)
-			s.block.Encrypt(
-				ecc[k],
-				ecc[k],
-			)
-		}
-	}
 	nbytes := 0
 	npkts := 0
 	for i := 0; i < s.dup+1; i++ {
@@ -785,13 +738,13 @@ func (
 		}
 	}
 	atomic.AddUint64(
-		&DefaultSnsi.KcpOutputPackets,
+		&DefaultSnsi.GFcpOutputPackets,
 		uint64(
 			npkts,
 		),
 	)
 	atomic.AddUint64(
-		&DefaultSnsi.KcpOutputBytes,
+		&DefaultSnsi.GFcpOutputBytes,
 		uint64(
 			nbytes,
 		),
@@ -804,13 +757,13 @@ func (
 	interval time.Duration,
 ) {
 	s.mu.Lock()
-	waitsnd := s.Kcp.WaitSnd()
+	waitsnd := s.GFcp.WaitSnd()
 	interval = time.Duration(
-		s.Kcp.Flush(
+		s.GFcp.Flush(
 			false,
 		),
 	) * time.Millisecond
-	if s.Kcp.WaitSnd() < waitsnd {
+	if s.GFcp.WaitSnd() < waitsnd {
 		s.notifyWriteEvent()
 	}
 	s.mu.Unlock()
@@ -821,7 +774,7 @@ func (
 func (
 	s *UDPSession,
 ) GetConv() uint32 {
-	return s.Kcp.conv
+	return s.GFcp.conv
 }
 
 func (
@@ -858,45 +811,18 @@ func (
 ) packetInput(
 	data []byte,
 ) {
-	dataValid := false
-	if s.block != nil {
-		s.block.Decrypt(
-			data,
-			data,
-		)
-		data = data[nonceSize:]
-		checksum := crc32.ChecksumIEEE(
-			data[crcSize:],
-		)
-		if checksum == binary.LittleEndian.Uint32(
-			data,
-		) {
-			data = data[crcSize:]
-			dataValid = true
-		} else {
-			atomic.AddUint64(
-				&DefaultSnsi.KcpChecksumFailures,
-				1,
-			)
-		}
-	} else if s.block == nil {
-		dataValid = true
-	}
-
-	if dataValid {
-		s.KcpInput(
-			data,
-		)
-	}
+	s.GFcpInput(
+		data,
+	)
 }
 
-// KcpInput ...
+// GFcpInput ...
 func (
 	s *UDPSession,
-) KcpInput(
+) GFcpInput(
 	data []byte,
 ) {
-	var KcpInErrors,
+	var GFcpInErrors,
 		fecErrs,
 		fecRecovered,
 		fecParityShards uint64
@@ -915,14 +841,14 @@ func (
 					f,
 				)
 				s.mu.Lock()
-				waitsnd := s.Kcp.WaitSnd()
+				waitsnd := s.GFcp.WaitSnd()
 				if f.flag() == KTypeData {
-					if ret := s.Kcp.Input(
+					if ret := s.GFcp.Input(
 						data[fecHeaderSizePlus2:],
 						true,
 						s.ackNoDelay,
 					); ret != 0 {
-						KcpInErrors++
+						GFcpInErrors++
 					}
 				}
 				for _, r := range recovers {
@@ -937,14 +863,14 @@ func (
 						) <= len(
 							r,
 						) && sz >= 2 {
-							if ret := s.Kcp.Input(
+							if ret := s.GFcp.Input(
 								r[2:sz],
 								false,
 								s.ackNoDelay,
 							); ret == 0 {
 								fecRecovered++
 							} else {
-								KcpInErrors++
+								GFcpInErrors++
 							}
 						} else {
 							fecErrs++
@@ -957,49 +883,49 @@ func (
 						r,
 					)
 				}
-				if n := s.Kcp.PeekSize(); n > 0 {
+				if n := s.GFcp.PeekSize(); n > 0 {
 					s.notifyReadEvent()
 				}
-				if s.Kcp.WaitSnd() < waitsnd {
+				if s.GFcp.WaitSnd() < waitsnd {
 					s.notifyWriteEvent()
 				}
 				s.mu.Unlock()
 			} else {
 				atomic.AddUint64(
-					&DefaultSnsi.KcpPreInputErrors,
+					&DefaultSnsi.GFcpPreInputErrors,
 					1,
 				)
 			}
 		} else {
 			atomic.AddUint64(
-				&DefaultSnsi.KcpInputErrors,
+				&DefaultSnsi.GFcpInputErrors,
 				1,
 			)
 		}
 	} else {
 		s.mu.Lock()
-		waitsnd := s.Kcp.WaitSnd()
-		if ret := s.Kcp.Input(
+		waitsnd := s.GFcp.WaitSnd()
+		if ret := s.GFcp.Input(
 			data,
 			true,
 			s.ackNoDelay,
 		); ret != 0 {
-			KcpInErrors++
+			GFcpInErrors++
 		}
-		if n := s.Kcp.PeekSize(); n > 0 {
+		if n := s.GFcp.PeekSize(); n > 0 {
 			s.notifyReadEvent()
 		}
-		if s.Kcp.WaitSnd() < waitsnd {
+		if s.GFcp.WaitSnd() < waitsnd {
 			s.notifyWriteEvent()
 		}
 		s.mu.Unlock()
 	}
 	atomic.AddUint64(
-		&DefaultSnsi.KcpInputPackets,
+		&DefaultSnsi.GFcpInputPackets,
 		1,
 	)
 	atomic.AddUint64(
-		&DefaultSnsi.KcpInputBytes,
+		&DefaultSnsi.GFcpInputBytes,
 		uint64(
 			len(
 				data,
@@ -1008,25 +934,25 @@ func (
 	)
 	if fecParityShards > 0 {
 		atomic.AddUint64(
-			&DefaultSnsi.KcpFECParityShards,
+			&DefaultSnsi.GFcpFECParityShards,
 			fecParityShards,
 		)
 	}
-	if KcpInErrors > 0 {
+	if GFcpInErrors > 0 {
 		atomic.AddUint64(
-			&DefaultSnsi.KcpInputErrors,
-			KcpInErrors,
+			&DefaultSnsi.GFcpInputErrors,
+			GFcpInErrors,
 		)
 	}
 	if fecErrs > 0 {
 		atomic.AddUint64(
-			&DefaultSnsi.KcpFailures,
+			&DefaultSnsi.GFcpFailures,
 			fecErrs,
 		)
 	}
 	if fecRecovered > 0 {
 		atomic.AddUint64(
-			&DefaultSnsi.KcpFECRecovered,
+			&DefaultSnsi.GFcpFECRecovered,
 			fecRecovered,
 		)
 	}
@@ -1035,9 +961,8 @@ func (
 type (
 	// Listener ...
 	Listener struct {
-		block        BlockCrypt // block encryption
-		dataShards   int        // FEC data shard
-		parityShards int        // FEC parity shard
+		dataShards   int // FEC data shard
+		parityShards int // FEC parity shard
 		/// FecDecoder ...
 		FecDecoder      *FecDecoder            // FEC mock initialization
 		conn            net.PacketConn         // the underlying packet connection
@@ -1045,7 +970,7 @@ type (
 		sessionLock     sync.Mutex
 		chAccepts       chan *UDPSession // Listen() backlog
 		chSessionClosed chan net.Addr    // session close queue
-		headerSize      int              // additional header for a Kcp frame
+		headerSize      int              // additional header for a GFcp frame
 		die             chan struct{}    // notify when the Listener has closed
 		rd              atomic.Value     // read deadline for Accept()
 		wd              atomic.Value
@@ -1058,83 +983,56 @@ func (
 	data []byte,
 	addr net.Addr,
 ) {
-	dataValid := false
-	if l.block != nil {
-		l.block.Decrypt(
-			data,
-			data,
-		)
-		data = data[nonceSize:]
-		checksum := crc32.ChecksumIEEE(
-			data[crcSize:],
-		)
-		if checksum == binary.LittleEndian.Uint32(
-			data,
+	l.sessionLock.Lock()
+	s, ok := l.sessions[addr.String()]
+	l.sessionLock.Unlock()
+	if !ok {
+		if len(
+			l.chAccepts,
+		) < cap(
+			l.chAccepts,
 		) {
-			data = data[crcSize:]
-			dataValid = true
-		} else {
-			atomic.AddUint64(
-				&DefaultSnsi.KcpChecksumFailures,
-				1,
-			)
-		}
-	} else if l.block == nil {
-		dataValid = true
-	}
-	if dataValid {
-		l.sessionLock.Lock()
-		s, ok := l.sessions[addr.String()]
-		l.sessionLock.Unlock()
-		if !ok {
-			if len(
-				l.chAccepts,
-			) < cap(
-				l.chAccepts,
-			) {
-				var conv uint32
-				convValid := false
-				if l.FecDecoder != nil {
-					isfec := binary.LittleEndian.Uint16(
-						data[4:],
-					)
-					if isfec == KTypeData {
-						conv = binary.LittleEndian.Uint32(
-							data[fecHeaderSizePlus2:],
-						)
-						convValid = true
-					}
-				} else {
+			var conv uint32
+			convValid := false
+			if l.FecDecoder != nil {
+				isfec := binary.LittleEndian.Uint16(
+					data[4:],
+				)
+				if isfec == KTypeData {
 					conv = binary.LittleEndian.Uint32(
-						data,
+						data[fecHeaderSizePlus2:],
 					)
 					convValid = true
 				}
-
-				if convValid {
-					s := newUDPSession(
-						conv,
-						l.dataShards,
-						l.parityShards,
-						l,
-						l.conn,
-						addr,
-						l.block,
-					)
-					s.KcpInput(
-						data,
-					)
-					l.sessionLock.Lock()
-					l.sessions[addr.String()] = s
-					l.sessionLock.Unlock()
-					l.chAccepts <- s
-				}
+			} else {
+				conv = binary.LittleEndian.Uint32(
+					data,
+				)
+				convValid = true
 			}
-		} else {
-			s.KcpInput(
-				data,
-			)
+
+			if convValid {
+				s := newUDPSession(
+					conv,
+					l.dataShards,
+					l.parityShards,
+					l,
+					l.conn,
+					addr,
+				)
+				s.GFcpInput(
+					data,
+				)
+				l.sessionLock.Lock()
+				l.sessions[addr.String()] = s
+				l.sessionLock.Unlock()
+				l.chAccepts <- s
+			}
 		}
+	} else {
+		s.GFcpInput(
+			data,
+		)
 	}
 }
 
@@ -1207,13 +1105,13 @@ func (
 	net.Conn,
 	error,
 ) {
-	return l.AcceptKCP()
+	return l.AcceptGFCP()
 }
 
-// AcceptKCP accepts a Kcp connection
+// AcceptGFCP accepts a GFcp connection
 func (
 	l *Listener,
-) AcceptKCP() (
+) AcceptGFCP() (
 	*UDPSession,
 	error,
 ) {
@@ -1334,7 +1232,7 @@ func (
 	return l.conn.LocalAddr()
 }
 
-// Listen listens for incoming Kcp packets addressed to our local address (laddr) via "udp"
+// Listen listens for incoming GFcp packets addressed to our local address (laddr) via "udp"
 func Listen(
 	laddr string,
 ) (
@@ -1343,17 +1241,15 @@ func Listen(
 ) {
 	return ListenWithOptions(
 		laddr,
-		nil,
 		0,
 		0,
 	)
 }
 
-// ListenWithOptions listens for incoming Kcp packets addressed to our local address (laddr) via "udp"
+// ListenWithOptions listens for incoming GFcp packets addressed to our local address (laddr) via "udp"
 // Porvides for encryption, sharding, parity, and RS coding parameters to be specified.
 func ListenWithOptions(
 	laddr string,
-	block BlockCrypt,
 	dataShards,
 	parityShards int,
 ) (
@@ -1384,16 +1280,14 @@ func ListenWithOptions(
 			)
 	}
 	return ServeConn(
-		block,
 		dataShards,
 		parityShards,
 		conn,
 	)
 }
 
-// ServeConn serves the Kcp protocol - a single packet is processed.
+// ServeConn serves the GFcp protocol - a single packet is processed.
 func ServeConn(
-	block BlockCrypt,
 	dataShards,
 	parityShards int,
 	conn net.PacketConn,
@@ -1420,15 +1314,11 @@ func ServeConn(
 	)
 	l.dataShards = dataShards
 	l.parityShards = parityShards
-	l.block = block
-	l.FecDecoder = KcpNewDECDecoder(
+	l.FecDecoder = GFcpNewDECDecoder(
 		rxFECMulti*(dataShards+parityShards),
 		dataShards,
 		parityShards,
 	)
-	if l.block != nil {
-		l.headerSize += cryptHeaderSize
-	}
 	if l.FecDecoder != nil {
 		l.headerSize += fecHeaderSizePlus2
 	}
@@ -1445,7 +1335,6 @@ func Dial(
 ) {
 	return DialWithOptions(
 		raddr,
-		nil,
 		0,
 		0,
 	)
@@ -1454,7 +1343,6 @@ func Dial(
 // DialWithOptions connects to the remote address "raddr" via "udp" with encryption options.
 func DialWithOptions(
 	raddr string,
-	block BlockCrypt,
 	dataShards,
 	parityShards int,
 ) (
@@ -1487,17 +1375,15 @@ func DialWithOptions(
 	}
 	return NewConn(
 		raddr,
-		block,
 		dataShards,
 		parityShards,
 		conn,
 	)
 }
 
-// NewConn establishes a session, talking Kcp over a packet connection.
+// NewConn establishes a session, talking GFcp over a packet connection.
 func NewConn(
 	raddr string,
-	block BlockCrypt,
 	dataShards,
 	parityShards int,
 	conn net.PacketConn,
@@ -1533,13 +1419,12 @@ func NewConn(
 		nil,
 		conn,
 		udpaddr,
-		block,
 	), nil
 }
 
 var refTime = time.Now()
 
-// KcpCurrentMs ...
-func KcpCurrentMs() uint32 {
+// GFcpCurrentMs ...
+func GFcpCurrentMs() uint32 {
 	return uint32(time.Since(refTime) / time.Millisecond)
 }

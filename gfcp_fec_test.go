@@ -8,14 +8,14 @@
 // All use of this code is governed by the MIT license.
 // The complete license is available in the LICENSE file.
 
-package lkcp9_test
+package gfcp_test
 
 import (
 	"encoding/binary"
 	"math/rand"
 	"testing"
 
-	"go.gridfinity.dev/lkcp9"
+	"go.gridfinity.dev/gfcp"
 )
 
 func BenchmarkFECDecode(
@@ -26,7 +26,7 @@ func BenchmarkFECDecode(
 		paritySize = 3
 		payLoad    = 1500
 	)
-	decoder := lkcp9.KcpNewDECDecoder(
+	decoder := gfcp.GFcpNewDECDecoder(
 		1024,
 		dataSize,
 		paritySize,
@@ -50,12 +50,12 @@ func BenchmarkFECDecode(
 		if i%(dataSize+paritySize) >= dataSize {
 			binary.LittleEndian.PutUint16(
 				pkt[4:],
-				lkcp9.KTypeParity,
+				gfcp.KTypeParity,
 			)
 		} else {
 			binary.LittleEndian.PutUint16(
 				pkt[4:],
-				lkcp9.KTypeData,
+				gfcp.KTypeData,
 			)
 		}
 		decoder.Decode(
@@ -74,7 +74,7 @@ func BenchmarkFECEncode(
 	b.SetBytes(
 		payLoad,
 	)
-	Encoder := lkcp9.KcpNewDECEncoder(
+	Encoder := gfcp.GFcpNewDECEncoder(
 		dataSize,
 		paritySize,
 		0,

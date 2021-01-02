@@ -1,4 +1,4 @@
-module go.gridfinity.dev/lkcp9
+module go.gridfinity.dev/gfcp
 
 go 1.14
 

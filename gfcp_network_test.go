@@ -8,7 +8,7 @@
 // All use of this code is governed by the MIT license.
 // The complete license is available in the LICENSE file.
 
-package lkcp9_test
+package gfcp_test
 
 import (
 	"bytes"
@@ -20,11 +20,11 @@ import (
 	"testing"
 	"time"
 
-	"go.gridfinity.dev/lkcp9"
+	"go.gridfinity.dev/gfcp"
 )
 
 func iclock() int32 {
-	return int32(lkcp9.KcpCurrentMs())
+	return int32(gfcp.GFcpCurrentMs())
 }
 
 type DelayPacket struct {
@@ -263,11 +263,11 @@ func test(
 			)
 		}
 	}
-	kcp1 := lkcp9.NewKCP(
+	gfcp1 := gfcp.NewGFCP(
 		0x11223344,
 		output1,
 	)
-	kcp2 := lkcp9.NewKCP(
+	gfcp2 := gfcp.NewGFCP(
 		0x11223344,
 		output2,
 	)
@@ -282,49 +282,49 @@ func test(
 	count := 0
 	maxrtt := 0
 
-	kcp1.WndSize(
+	gfcp1.WndSize(
 		128,
 		128,
 	)
-	kcp2.WndSize(
+	gfcp2.WndSize(
 		128,
 		128,
 	)
 
 	if mode == 0 {
-		kcp1.NoDelay(
+		gfcp1.NoDelay(
 			0,
 			10,
 			0,
 			0,
 		)
-		kcp2.NoDelay(
+		gfcp2.NoDelay(
 			0,
 			10,
 			0,
 			0,
 		)
 	} else if mode == 1 {
-		kcp1.NoDelay(
+		gfcp1.NoDelay(
 			0,
 			10,
 			0,
 			1,
 		)
-		kcp2.NoDelay(
+		gfcp2.NoDelay(
 			0,
 			10,
 			0,
 			1,
 		)
 	} else {
-		kcp1.NoDelay(
+		gfcp1.NoDelay(
 			1,
 			10,
 			2,
 			1,
 		)
-		kcp2.NoDelay(
+		gfcp2.NoDelay(
 			1,
 			10,
 			2,
@@ -347,8 +347,8 @@ func test(
 		current = uint32(
 			iclock(),
 		)
-		kcp1.Update()
-		kcp2.Update()
+		gfcp1.Update()
+		gfcp2.Update()
 
 		for ; current >= slap; slap += 20 {
 			buf := new(
@@ -369,7 +369,7 @@ func test(
 					current,
 				),
 			)
-			kcp1.Send(
+			gfcp1.Send(
 				buf.Bytes(),
 			)
 		}
@@ -383,7 +383,7 @@ func test(
 			if hr < 0 {
 				break
 			}
-			kcp2.Input(
+			gfcp2.Input(
 				buffer[:hr],
 				true,
 				false,
@@ -399,7 +399,7 @@ func test(
 			if hr < 0 {
 				break
 			}
-			kcp1.Input(
+			gfcp1.Input(
 				buffer[:hr],
 				true,
 				false,
@@ -408,7 +408,7 @@ func test(
 
 		for {
 			hr = int32(
-				kcp2.Recv(
+				gfcp2.Recv(
 					buffer[:10],
 				),
 			)
@@ -424,14 +424,14 @@ func test(
 				binary.LittleEndian,
 				&sn,
 			)
-			kcp2.Send(
+			gfcp2.Send(
 				buffer[:hr],
 			)
 		}
 
 		for {
 			hr = int32(
-				kcp1.Recv(
+				gfcp1.Recv(
 					buffer[:10],
 				),
 			)
@@ -526,27 +526,27 @@ func TestNetwork(
 func BenchmarkFlush(
 	b *testing.B,
 ) {
-	Kcp := lkcp9.NewKCP(
+	GFcp := gfcp.NewGFCP(
 		1,
 		func(
 			buf []byte,
 			size int,
 		) {
 		})
-	Kcp.SndBuf = make(
-		[]lkcp9.KcpSegment,
+	GFcp.SndBuf = make(
+		[]gfcp.GFcpSegment,
 		1024,
 	)
-	for k := range Kcp.SndBuf {
-		Kcp.SndBuf[k].Kxmit = 1
-		Kcp.SndBuf[k].KcpResendTs = lkcp9.KcpCurrentMs() + 10000
+	for k := range GFcp.SndBuf {
+		GFcp.SndBuf[k].Kxmit = 1
+		GFcp.SndBuf[k].GFcpResendTs = gfcp.GFcpCurrentMs() + 10000
 	}
 	b.ResetTimer()
 	b.ReportAllocs()
 	var mu sync.Mutex
 	for i := 0; i < b.N; i++ {
 		mu.Lock()
-		Kcp.Flush(
+		GFcp.Flush(
 			false,
 		)
 		mu.Unlock()

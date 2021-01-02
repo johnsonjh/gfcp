@@ -8,7 +8,7 @@
 // All use of this code is governed by the MIT license.
 // The complete license is available in the LICENSE file.
 
-package lkcp9 // import "go.gridfinity.dev/lkcp9"
+package gfcp // import "go.gridfinity.dev/gfcp"
 
 import (
 	"encoding/binary"
@@ -64,8 +64,8 @@ type FecDecoder struct {
 	codec        reedsolomon.Encoder
 }
 
-// KcpNewDECDecoder ...
-func KcpNewDECDecoder(
+// GFcpNewDECDecoder ...
+func GFcpNewDECDecoder(
 	rxlimit,
 	dataShards,
 	parityShards int,
@@ -102,7 +102,7 @@ func KcpNewDECDecoder(
 	)
 	dec.zeros = make(
 		[]byte,
-		KcpMtuLimit,
+		GFcpMtuLimit,
 	)
 	return dec
 }
@@ -256,7 +256,7 @@ func (
 	if len(dec.rx) > dec.rxlimit {
 		if dec.rx[0].flag() == KTypeData {
 			atomic.AddUint64(
-				&DefaultSnsi.KcpFECRuntShards,
+				&DefaultSnsi.GFcpFECRuntShards,
 				1,
 			)
 		}
@@ -316,8 +316,8 @@ type (
 	}
 )
 
-// KcpNewDECEncoder ...
-func KcpNewDECEncoder(
+// GFcpNewDECEncoder ...
+func GFcpNewDECEncoder(
 	dataShards,
 	parityShards,
 	offset int,
@@ -353,12 +353,12 @@ func KcpNewDECEncoder(
 	for k := range enc.shardCache {
 		enc.shardCache[k] = make(
 			[]byte,
-			KcpMtuLimit,
+			GFcpMtuLimit,
 		)
 	}
 	enc.zeros = make(
 		[]byte,
-		KcpMtuLimit,
+		GFcpMtuLimit,
 	)
 	return enc
 }
