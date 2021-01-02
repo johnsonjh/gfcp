@@ -1531,7 +1531,7 @@ func init() {
 	// I actually spent hours of real time, doing things like hot-spot profiling,
 	// running simulations, and doing regression testing, so, just fuck yourself.
 	debug.SetGCPercent(
-		10,
+		2000,
 	)
 	// Register the MIT License
 	lkcp9Legal.RegisterLicense(

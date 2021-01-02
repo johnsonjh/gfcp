@@ -56,7 +56,7 @@ func (
 	}
 	n.seed = hh.Sum(
 		n.seed[:],
-		nonce[:],
+		n.seed[:],
 	)
 	copy(
 		nonce,

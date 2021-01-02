@@ -743,7 +743,7 @@ func TestParallel(
 	t.Parallel()
 	t.Log(
 		fmt.Sprintf(
-			"Stage 1/2: Goroutines: %v",
+			"\tStage 1/2:tGoroutines: %v",
 			runtime.NumGoroutine(),
 		),
 	)
@@ -761,14 +761,14 @@ func TestParallel(
 	}
 	t.Log(
 		fmt.Sprintf(
-			"Stage 2/2: Goroutines: %v",
+			"\tStage 2/2:\tGoroutines: %v",
 			runtime.NumGoroutine(),
 		),
 	)
 	wg.Wait()
 	t.Log(
 		fmt.Sprintf(
-			"Stage 2/3: Goroutines: %v",
+			"\tStage 2/3:\tGoroutines: %v",
 			runtime.NumGoroutine(),
 		),
 	)
@@ -801,7 +801,7 @@ func BenchmarkEchoSpeed1K(
 ) {
 	speedclient(
 		b,
-		1*1024,
+		1*1000,
 	)
 }
 
@@ -810,7 +810,7 @@ func BenchmarkEchoSpeed4K(
 ) {
 	speedclient(
 		b,
-		4*1024,
+		4*1000,
 	)
 }
 
@@ -819,7 +819,7 @@ func BenchmarkEchoSpeed64K(
 ) {
 	speedclient(
 		b,
-		64*1024,
+		64*1000,
 	)
 }
 
@@ -828,7 +828,7 @@ func BenchmarkEchoSpeed256K(
 ) {
 	speedclient(
 		b,
-		256*1024,
+		256*1000,
 	)
 }
 
@@ -837,7 +837,7 @@ func BenchmarkEchoSpeed512K(
 ) {
 	speedclient(
 		b,
-		512*1024,
+		512*1000,
 	)
 }
 
@@ -846,7 +846,7 @@ func BenchmarkEchoSpeed1M(
 ) {
 	speedclient(
 		b,
-		1*1024*1024,
+		1*1000*1000,
 	)
 }
 
@@ -855,7 +855,7 @@ func BenchmarkEchoSpeed4M(
 ) {
 	speedclient(
 		b,
-		4*1024*1024,
+		4*1000*1000,
 	)
 }
 
@@ -864,7 +864,7 @@ func BenchmarkEchoSpeed8M(
 ) {
 	speedclient(
 		b,
-		8*1024*1024,
+		8*1000*1000,
 	)
 }
 
@@ -899,7 +899,7 @@ func BenchmarkSinkSpeed1K(
 ) {
 	sinkclient(
 		b,
-		1*1024,
+		1*1000,
 	)
 }
 
@@ -908,7 +908,7 @@ func BenchmarkSinkSpeed4K(
 ) {
 	sinkclient(
 		b,
-		4*1024,
+		4*1000,
 	)
 }
 
@@ -917,7 +917,7 @@ func BenchmarkSinkSpeed64K(
 ) {
 	sinkclient(
 		b,
-		64*1024,
+		64*1000,
 	)
 }
 
@@ -926,7 +926,7 @@ func BenchmarkSinkSpeed256K(
 ) {
 	sinkclient(
 		b,
-		256*1024,
+		256*1000,
 	)
 }
 
@@ -935,7 +935,7 @@ func BenchmarkSinkSpeed512K(
 ) {
 	sinkclient(
 		b,
-		512*1024,
+		512*1000,
 	)
 }
 
@@ -944,7 +944,7 @@ func BenchmarkSinkSpeed1M(
 ) {
 	sinkclient(
 		b,
-		1*1024*1024,
+		1*1000*1000,
 	)
 }
 
@@ -953,7 +953,7 @@ func BenchmarkSinkSpeed4M(
 ) {
 	sinkclient(
 		b,
-		4*1024*1024,
+		4*1000*1000,
 	)
 }
 
@@ -962,7 +962,7 @@ func BenchmarkSinkSpeed8M(
 ) {
 	sinkclient(
 		b,
-		8*1024*1024,
+		8*1000*1000,
 	)
 }
 
@@ -1093,7 +1093,7 @@ func TestListenerClose(
 		),
 	)
 	time.Sleep(
-		10 * time.Millisecond,
+		1 * time.Millisecond,
 	)
 	if _, err := l.Accept(); err == nil {
 		t.Fail()
