@@ -25,12 +25,12 @@ func TestArchitecture(
 	defer u.Leakplug(
 		t,
 	)
-    is64bit := uint64(^uintptr(0)) == ^uint64(0)
-    if !is64bit {
-        t.Fatal(
-			"Not 64-bit: Unsupported architecutre",
-        )
-    }
+	is64bit := uint64(^uintptr(0)) == ^uint64(0)
+	if !is64bit {
+		t.Fatal(
+			"Not 64-bit: Unsupported architecture",
+		)
+	}
 }
 
 func TestGoEnvironment(
@@ -41,13 +41,13 @@ func TestGoEnvironment(
 	)
 	t.Log(
 		fmt.Sprintf(
-			        "Built with %v (%v)for %v/%v\n%v logical CPUs, %v goroutines available",
-					runtime.Version(),
-				    runtime.Compiler,
-					runtime.GOOS,
-					runtime.GOARCH,
-					runtime.NumCPU(),
-					runtime.GOMAXPROCS(-1),
+			"Built with %v (%v)for %v/%v\n%v logical CPUs, %v goroutines available",
+			runtime.Version(),
+			runtime.Compiler,
+			runtime.GOOS,
+			runtime.GOARCH,
+			runtime.NumCPU(),
+			runtime.GOMAXPROCS(-1),
 		),
 	)
 }

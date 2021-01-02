@@ -123,8 +123,7 @@ func dialEcho() (
 	sess.SetDeadline(time.Now().Add(
 		time.Minute,
 	))
-	
-	
+
 	return sess, err
 }
 
@@ -192,7 +191,7 @@ func dialTinyBufferEcho() (
 			err,
 		)
 	}
-	
+
 	return sess, err
 }
 
@@ -203,8 +202,7 @@ func listenEcho() (
 	block, _ := lkcp9.NewNoneBlockCrypt(
 		pass,
 	)
-	
-	
+
 	return lkcp9.ListenWithOptions(
 		portEcho,
 		block,
@@ -220,8 +218,7 @@ func listenTinyBufferEcho() (
 	block, _ := lkcp9.NewNoneBlockCrypt(
 		pass,
 	)
-	
-	
+
 	return lkcp9.ListenWithOptions(
 		portTinyBufferEcho,
 		block,
@@ -234,8 +231,6 @@ func listenSink() (
 	net.Listener,
 	error,
 ) {
-	
-	
 	return lkcp9.ListenWithOptions(
 		portSink,
 		nil,
@@ -266,8 +261,6 @@ func echoServer() {
 			go handleEcho(s.(*lkcp9.UDPSession))
 		}
 	}()
-	
-	
 }
 
 func sinkServer() {
@@ -296,8 +289,6 @@ func sinkServer() {
 			go handleSink(s.(*lkcp9.UDPSession))
 		}
 	}()
-	
-	
 }
 
 func tinyBufferEchoServer() {
@@ -316,8 +307,6 @@ func tinyBufferEchoServer() {
 			go handleTinyBufferEcho(s.(*lkcp9.UDPSession))
 		}
 	}()
-	
-	
 }
 
 func handleEcho(
@@ -367,8 +356,7 @@ func handleEcho(
 		conn.Write(
 			buf[:n],
 		)
-		
-		
+
 	}
 }
 
@@ -416,8 +404,7 @@ func handleSink(
 				err,
 			)
 		}
-		
-		
+
 	}
 }
 
@@ -443,8 +430,7 @@ func handleTinyBufferEcho(
 		conn.Write(
 			buf[:n],
 		)
-		
-		
+
 	}
 }
 
@@ -475,8 +461,6 @@ func TestTimeout(
 		t.Fail()
 	}
 	cli.Close()
-	
-	
 }
 
 func TestSendRecv(
@@ -527,8 +511,6 @@ func TestSendRecv(
 		}
 	}
 	cli.Close()
-	
-	
 }
 
 func TestSendVector(
@@ -593,8 +575,6 @@ func TestSendVector(
 		}
 	}
 	cli.Close()
-	
-	
 }
 
 func TestTinyBufferReceiver(
@@ -672,8 +652,6 @@ func TestTinyBufferReceiver(
 		}
 	}
 	cli.Close()
-	
-	
 }
 
 func TestClose(
@@ -709,31 +687,29 @@ func TestClose(
 		t.Fail()
 	}
 	cli.Close()
-	
-	
 }
 
 func TestParallel(
 	t *testing.T,
 ) {
-	var concurrent = 1024
+	concurrent := 1024
 	if runtime.GOOS == "darwin" {
 		t.Log("--- WARN: Detected macOS: Lowering concurrency to 128")
 		concurrent = 128
 		return
 	}
-	
 	t.Log(
 		fmt.Sprintf(
 			"--- INFO: Target concurrency: %v",
 			concurrent,
-		)
+		),
+	)
 	t.Parallel()
 	t.Log(
 		fmt.Sprintf(
 			"Stage 1/2: Goroutines: %v",
 			runtime.NumGoroutine(),
-		)
+		),
 	)
 	defer u.Leakplug(
 		t,
@@ -751,17 +727,15 @@ func TestParallel(
 		fmt.Sprintf(
 			"Stage 2/2: Goroutines: %v",
 			runtime.NumGoroutine(),
-		)
+		),
 	)
 	wg.Wait()
 	t.Log(
 		fmt.Sprintf(
 			"Stage 2/3: Goroutines: %v",
 			runtime.NumGoroutine(),
-		)
+		),
 	)
-	
-	
 }
 
 func parallel_client(
@@ -782,8 +756,7 @@ func parallel_client(
 		64,
 	)
 	wg.Done()
-	
-	
+
 	return
 }
 
@@ -794,8 +767,6 @@ func BenchmarkEchoSpeed4K(
 		b,
 		4096,
 	)
-	
-	
 }
 
 func BenchmarkEchoSpeed64K(
@@ -805,8 +776,6 @@ func BenchmarkEchoSpeed64K(
 		b,
 		65536,
 	)
-	
-	
 }
 
 func BenchmarkEchoSpeed512K(
@@ -815,8 +784,6 @@ func BenchmarkEchoSpeed512K(
 	speedclient(b,
 		524288,
 	)
-	
-	
 }
 
 func BenchmarkEchoSpeed1M(
@@ -826,8 +793,6 @@ func BenchmarkEchoSpeed1M(
 		b,
 		1048576,
 	)
-	
-	
 }
 
 func speedclient(
@@ -859,10 +824,8 @@ func BenchmarkSinkSpeed4K(
 ) {
 	sinkclient(
 		b,
-		4 * 1024,
+		4*1024,
 	)
-	
-	
 }
 
 func BenchmarkSinkSpeed64K(
@@ -870,7 +833,7 @@ func BenchmarkSinkSpeed64K(
 ) {
 	sinkclient(
 		b,
-		64 * 1024,
+		64*1024,
 	)
 }
 
@@ -879,7 +842,7 @@ func BenchmarkSinkSpeed256K(
 ) {
 	sinkclient(
 		b,
-		256 * 1024,
+		256*1024,
 	)
 }
 
@@ -888,7 +851,7 @@ func BenchmarkSinkSpeed1M(
 ) {
 	sinkclient(
 		b,
-		1 * 1024 * 1024,
+		1*1024*1024,
 	)
 }
 
@@ -1004,20 +967,20 @@ func TestListenerClose(
 	l.SetReadDeadline(
 		time.Now().Add(
 			time.Second,
-		)
+		),
 	)
 	l.SetWriteDeadline(
 		time.Now().Add(
 			time.Second,
-		)
+		),
 	)
 	l.SetDeadline(
 		time.Now().Add(
 			time.Second,
-		)
+		),
 	)
 	time.Sleep(
-		2 * time.Second,
+		1 * time.Second,
 	)
 	if _, err := l.Accept(); err == nil {
 		t.Fail()

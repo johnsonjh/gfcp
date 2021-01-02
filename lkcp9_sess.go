@@ -480,7 +480,7 @@ func (
 }
 
 // RemoteAddr returns the remote network address.
-// The adress returned is shared by all invocations of RemoteAddr - do not modify it.
+// The address returned is shared by all invocations of RemoteAddr - do not modify it.
 func (
 	s *UDPSession,
 ) RemoteAddr() net.Addr {

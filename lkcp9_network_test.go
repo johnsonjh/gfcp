@@ -19,10 +19,9 @@ import (
 	"sync"
 	"testing"
 	"time"
+
 	"go.gridfinity.dev/lkcp9"
 )
-
-
 
 func iclock() int32 {
 	return int32(lkcp9.KcpCurrentMs())
@@ -56,15 +55,17 @@ func (p *DelayPacket) size() int      { return p._size }
 func (p *DelayPacket) ts() int32      { return p._ts }
 func (p *DelayPacket) setts(ts int32) { p._ts = ts }
 
-type DelayTunnel struct{ *list.List }
-type LatencySimulator struct {
-	current                        int32
-	lostrate, rttmin, rttmax, nmax int
-	p12                            DelayTunnel
-	p21                            DelayTunnel
-	r12                            *rand.Rand
-	r21                            *rand.Rand
-}
+type (
+	DelayTunnel      struct{ *list.List }
+	LatencySimulator struct {
+		current                        int32
+		lostrate, rttmin, rttmax, nmax int
+		p12                            DelayTunnel
+		p21                            DelayTunnel
+		r12                            *rand.Rand
+		r21                            *rand.Rand
+	}
+)
 
 func (
 	p *LatencySimulator,
@@ -446,7 +447,8 @@ func BenchmarkFlush(
 		func(
 			buf []byte,
 			size int,
-		){})
+		) {
+		})
 	Kcp.SndBuf = make(
 		[]lkcp9.KcpSegment,
 		1024,

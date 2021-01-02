@@ -30,4 +30,3 @@ func NewNoneBlockCrypt(key []byte) (BlockCrypt, error) {
 }
 func (c *noneBlockCrypt) Encrypt(dst, src []byte) { copy(dst, src) }
 func (c *noneBlockCrypt) Decrypt(dst, src []byte) { copy(dst, src) }
-

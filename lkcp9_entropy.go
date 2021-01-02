@@ -11,10 +11,11 @@
 package lkcp9 // import "go.gridfinity.dev/lkcp9"
 
 import (
-	hh "github.com/minio/highwayhash"
-	//hh "crypto/md5"
 	"crypto/rand"
 	"io"
+
+	hh "github.com/minio/highwayhash"
+	// hh "crypto/md5"
 )
 
 // Entropy defines a entropy source

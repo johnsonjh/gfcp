@@ -13,16 +13,16 @@ package lkcp9 // import "go.gridfinity.dev/lkcp9"
 
 import (
 	"encoding/binary"
-	"sync/atomic"
-	"runtime"
 	"math"
+	"runtime"
+	"sync/atomic"
 
 	lkcp9Legal "go4.org/legal"
 )
 
 // IKcp9 protocol constants
 const (
-	IKcpRtoNdl     = 20  // IKcpRtoNdl:	NoDelay min RTO
+	IKcpRtoNdl     = 20 // IKcpRtoNdl:	NoDelay min RTO
 	IKcpRtoMin     = 90 // IKcpRtoMin:	Regular min RTO
 	IKcpRtoDef     = 150
 	IKcpRtoMax     = 45000
@@ -41,8 +41,8 @@ const (
 	IKcpDeadLink   = 20
 	IKcpThreshInit = 2
 	IKcpThreshMin  = 2
-	IKcpProbeInit  = 5000	// 5s initial probe window
-	IKcpProbeLimit = 60000	// 60s hard probe timeout
+	IKcpProbeInit  = 5000  // 5s initial probe window
+	IKcpProbeLimit = 60000 // 60s hard probe timeout
 )
 
 type outputCallback func(
@@ -1452,7 +1452,7 @@ func (
 func init() {
 	// 8 Goroutines per CPU or hardware thread
 	if (runtime.GOMAXPROCS(runtime.NumCPU() * 8)) < (runtime.NumCPU() * 8) {
-	    _ = runtime.GOMAXPROCS(runtime.NumCPU() * 8)
+		_ = runtime.GOMAXPROCS(runtime.NumCPU() * 8)
 	}
 	// Register the MIT License
 	lkcp9Legal.RegisterLicense(

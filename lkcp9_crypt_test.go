@@ -12,12 +12,13 @@ package lkcp9_test
 
 import (
 	"bytes"
-	"fmt"
-	hh "github.com/minio/highwayhash"
 	"crypto/rand"
+	"fmt"
 	"hash/crc32"
 	"io"
 	"testing"
+
+	hh "github.com/minio/highwayhash"
 
 	"go.gridfinity.dev/lkcp9"
 
@@ -203,4 +204,3 @@ func BenchmarkCsprngKcpNonceHH(
 		)
 	}
 }
-
