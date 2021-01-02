@@ -50,7 +50,8 @@ func (
 		msgs[k].Buffers = [][]byte{
 			make(
 				[]byte,
-				KcpMtuLimit),
+				KcpMtuLimit,
+			),
 		}
 	}
 	conn := ipv6.NewPacketConn(

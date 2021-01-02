@@ -22,9 +22,9 @@ import (
 
 // IKcp9 protocol constants
 const (
-	IKcpRtoNdl     = 20 // IKcpRtoNdl:	NoDelay min RTO
-	IKcpRtoMin     = 90 // IKcpRtoMin:	Regular min RTO
-	IKcpRtoDef     = 150
+	IKcpRtoNdl     = 10  // IKcpRtoNdl:	NoDelay min RTO
+	IKcpRtoMin     = 100 // IKcpRtoMin:	Regular min RTO
+	IKcpRtoDef     = 250
 	IKcpRtoMax     = 45000
 	IKcpCmdPush    = 81 // IKcpCmdPush:	Push data
 	IKcpCmdAck     = 82 // IKcpCmdAck:	Ack
@@ -32,17 +32,17 @@ const (
 	IKcpCmdWins    = 84 // IKcpCmdWins:	Set window Size
 	IKcpAskSend    = 1  // IKcpAskSend:	Need to send IKcpCmdWask
 	IKcpAskTell    = 2  // IKcpAskTell:	Need to send IKcpCmdWins
-	IKcpWndSnd     = 32
-	IKcpWndRcv     = 32
-	IKcpMtuDef     = 9000
+	IKcpWndSnd     = 64
+	IKcpWndRcv     = 64
+	IKcpMtuDef     = 1500
 	IKcpAckFast    = 3
-	IKcpInterval   = 100
+	IKcpInterval   = 70
 	IKcpOverhead   = 24
 	IKcpDeadLink   = 20
 	IKcpThreshInit = 2
-	IKcpThreshMin  = 2
+	IKcpThreshMin  = 1
 	IKcpProbeInit  = 5000  // 5s initial probe window
-	IKcpProbeLimit = 60000 // 60s hard probe timeout
+	IKcpProbeLimit = 30000 // 30s hard probe timeout
 )
 
 type outputCallback func(
@@ -278,7 +278,9 @@ func (
 	return
 }
 
-func (Kcp *KCP) delSegment(
+func (
+	Kcp *KCP,
+) delSegment(
 	KcpSeg *KcpSegment,
 ) {
 	if KcpSeg.data != nil {
@@ -328,7 +330,9 @@ func (
 	}
 	if len(
 		Kcp.rcvQueue,
-	) < int(KcpSeg.frg+1) {
+	) < int(
+		KcpSeg.frg+1,
+	) {
 		return -1
 	}
 	for k := range Kcp.rcvQueue {
@@ -380,7 +384,9 @@ func (
 			buffer,
 			KcpSeg.data,
 		)
-		buffer = buffer[len(KcpSeg.data):]
+		buffer = buffer[len(
+			KcpSeg.data,
+		):]
 		n += len(
 			KcpSeg.data,
 		)
@@ -403,7 +409,9 @@ func (
 		KcpSeg := &Kcp.rcvBuf[k]
 		if KcpSeg.sn == Kcp.rcvNxt && len(
 			Kcp.rcvQueue,
-		) < int(Kcp.rcvWnd) {
+		) < int(
+			Kcp.rcvWnd,
+		) {
 			Kcp.rcvNxt++
 			count++
 		} else {
@@ -422,7 +430,9 @@ func (
 	}
 	if len(
 		Kcp.rcvQueue,
-	) < int(Kcp.rcvWnd) && fastRecovery {
+	) < int(
+		Kcp.rcvWnd,
+	) && fastRecovery {
 		Kcp.probe |= IKcpAskTell
 	}
 	return
@@ -446,8 +456,14 @@ func (
 		)
 		if n > 0 {
 			KcpSeg := &Kcp.sndQueue[n-1]
-			if len(KcpSeg.data) < int(Kcp.mss) {
-				capacity := int(Kcp.mss) - len(
+			if len(
+				KcpSeg.data,
+			) < int(
+				Kcp.mss,
+			) {
+				capacity := int(
+					Kcp.mss,
+				) - len(
 					KcpSeg.data,
 				)
 				extend := capacity
@@ -462,20 +478,33 @@ func (
 					KcpSeg.data,
 				)
 				KcpSeg.data = KcpSeg.data[:oldlen+extend]
-				copy(KcpSeg.data[oldlen:], buffer)
+				copy(
+					KcpSeg.data[oldlen:],
+					buffer,
+				)
 				buffer = buffer[extend:]
 			}
 		}
-		if len(buffer) == 0 {
+		if len(
+			buffer,
+		) == 0 {
 			return 0
 		}
 	}
-	if len(buffer) <= int(Kcp.mss) {
+	if len(
+		buffer,
+	) <= int(
+		Kcp.mss,
+	) {
 		count = 1
 	} else {
 		count = (len(
 			buffer,
-		) + int(Kcp.mss) - 1) / int(Kcp.mss)
+		) + int(
+			Kcp.mss,
+		) - 1) / int(
+			Kcp.mss,
+		)
 	}
 	if count > 255 {
 		return -2
@@ -546,7 +575,9 @@ func (
 		Kcp.rxSrtt,
 	) + _imax(
 		Kcp.interval,
-		uint32(Kcp.rxRttVar)<<2)
+		uint32(
+			Kcp.rxRttVar,
+		)<<2)
 	Kcp.rxRto = _ibound(
 		Kcp.rxMinRto,
 		rto,
@@ -710,9 +741,7 @@ func (
 	}
 
 	if !repeat {
-		dataCopy := KxmitBuf.Get().([]byte)[:len(
-			newKcpSeg.data,
-		)]
+		dataCopy := KxmitBuf.Get().([]byte)[:len(newKcpSeg.data)]
 		copy(
 			dataCopy,
 			newKcpSeg.data,
@@ -741,7 +770,9 @@ func (
 		KcpSeg := &Kcp.rcvBuf[k]
 		if KcpSeg.sn == Kcp.rcvNxt && len(
 			Kcp.rcvQueue,
-		) < int(Kcp.rcvWnd) {
+		) < int(
+			Kcp.rcvWnd,
+		) {
 			Kcp.rcvNxt++
 			count++
 		} else {
@@ -790,7 +821,9 @@ func (
 			frg uint8
 		if len(
 			data,
-		) < int(IKcpOverhead) {
+		) < int(
+			IKcpOverhead,
+		) {
 			break
 		}
 		data = iKcpDecode32u(
@@ -840,7 +873,9 @@ func (
 			return -3
 		}
 		if regular {
-			Kcp.rmtWnd = uint32(wnd)
+			Kcp.rmtWnd = uint32(
+				wnd,
+			)
 		}
 		Kcp.parseUna(
 			una,
@@ -960,9 +995,12 @@ func (
 	if len(
 		Kcp.rcvQueue,
 	) < int(Kcp.rcvWnd) {
-		return uint16(int(Kcp.rcvWnd) - len(
-			Kcp.rcvQueue,
-		),
+		return uint16(
+			int(
+				Kcp.rcvWnd,
+			) - len(
+				Kcp.rcvQueue,
+			),
 		)
 	}
 	return 0
@@ -989,7 +1027,9 @@ func (
 		) - len(
 			ptr,
 		)
-		if size+space > int(Kcp.mtu) {
+		if size+space > int(
+			Kcp.mtu,
+		) {
 			Kcp.output(
 				buffer,
 				size,
@@ -1035,7 +1075,10 @@ func (
 		if Kcp.probeWait == 0 {
 			Kcp.probeWait = IKcpProbeInit
 			Kcp.tsProbe = current + Kcp.probeWait
-		} else if _itimediff(current, Kcp.tsProbe) >= 0 {
+		} else if _itimediff(
+			current,
+			Kcp.tsProbe,
+		) >= 0 {
 			if Kcp.probeWait < IKcpProbeInit {
 				Kcp.probeWait = IKcpProbeInit
 			}
@@ -1103,7 +1146,9 @@ func (
 			newSegsCount,
 		)
 	}
-	resent := uint32(Kcp.fastresend)
+	resent := uint32(
+		Kcp.fastresend,
+	)
 	if Kcp.fastresend <= 0 {
 		resent = 0xFFFFFFFF
 	}
@@ -1113,7 +1158,9 @@ func (
 		lostSegs,
 		fastKcpRestransmittedSegments,
 		earlyKcpRestransmittedSegments uint64
-	minrto := int32(Kcp.interval)
+	minrto := int32(
+		Kcp.interval,
+	)
 	ref := Kcp.SndBuf[:len(
 		Kcp.SndBuf,
 	)]
@@ -1290,9 +1337,15 @@ func (
 ) Check() uint32 {
 	current := KcpCurrentMs()
 	tsFlush := Kcp.tsFlush
-	tmFlush := int32(math.MaxInt32)
-	tmPacket := int32(math.MaxInt32)
-	minimal := uint32(0)
+	tmFlush := int32(
+		math.MaxInt32,
+	)
+	tmPacket := int32(
+		math.MaxInt32,
+	)
+	minimal := uint32(
+		0,
+	)
 	if Kcp.updated == 0 {
 		return current
 	}
@@ -1329,9 +1382,13 @@ func (
 			tmPacket = diff
 		}
 	}
-	minimal = uint32(tmPacket)
+	minimal = uint32(
+		tmPacket,
+	)
 	if tmPacket >= tmFlush {
-		minimal = uint32(tmFlush)
+		minimal = uint32(
+			tmFlush,
+		)
 	}
 	if minimal >= Kcp.interval {
 		minimal = Kcp.interval
@@ -1349,7 +1406,9 @@ func (
 	if mtu < 50 || mtu < IKcpOverhead {
 		return -1
 	}
-	if Kcp.reserved >= int(Kcp.mtu-IKcpOverhead) || Kcp.reserved < 0 {
+	if Kcp.reserved >= int(
+		Kcp.mtu-IKcpOverhead,
+	) || Kcp.reserved < 0 {
 		return -1
 	}
 	buffer := make(
@@ -1359,8 +1418,12 @@ func (
 	/*if buffer == nil {
 		return -2
 	}*/ // XXX(jhj): buffer can't be nil
-	Kcp.mtu = uint32(mtu)
-	Kcp.mss = Kcp.mtu - IKcpOverhead - uint32(Kcp.reserved)
+	Kcp.mtu = uint32(
+		mtu,
+	)
+	Kcp.mss = Kcp.mtu - IKcpOverhead - uint32(
+		Kcp.reserved,
+	)
 	Kcp.buffer = buffer
 	return 0
 }
@@ -1380,7 +1443,9 @@ func (
 	nc int,
 ) int {
 	if nodelay >= 0 {
-		Kcp.nodelay = uint32(nodelay)
+		Kcp.nodelay = uint32(
+			nodelay,
+		)
 		if nodelay != 0 {
 			Kcp.rxMinRto = IKcpRtoNdl
 		} else {
@@ -1393,13 +1458,19 @@ func (
 		} else if interval < 10 {
 			interval = 10
 		}
-		Kcp.interval = uint32(interval)
+		Kcp.interval = uint32(
+			interval,
+		)
 	}
 	if resend >= 0 {
-		Kcp.fastresend = int32(resend)
+		Kcp.fastresend = int32(
+			resend,
+		)
 	}
 	if nc >= 0 {
-		Kcp.nocwnd = int32(nc)
+		Kcp.nocwnd = int32(
+			nc,
+		)
 	}
 	return 0
 }
@@ -1412,10 +1483,14 @@ func (
 	rcvwnd int,
 ) int {
 	if sndwnd > 0 {
-		Kcp.sndWnd = uint32(sndwnd)
+		Kcp.sndWnd = uint32(
+			sndwnd,
+		)
 	}
 	if rcvwnd > 0 {
-		Kcp.rcvWnd = uint32(rcvwnd)
+		Kcp.rcvWnd = uint32(
+			rcvwnd,
+		)
 	}
 	return 0
 }
@@ -1455,7 +1530,9 @@ func init() {
 	// I know you want to fuck around. Too bad that you're also fucking retarded.
 	// I actually spent hours of real time, doing things like hot-spot profiling,
 	// running simulations, and doing regression testing, so, just fuck yourself.
-	debug.SetGCPercent(5)
+	debug.SetGCPercent(
+		10,
+	)
 	// Register the MIT License
 	lkcp9Legal.RegisterLicense(
 		"\nThe MIT License (MIT)\n\nCopyright © 2015 Daniel Fu <daniel820313@gmail.com>.\nCopyright © 2019 Loki 'l0k18' Verloren <stalker.loki@protonmail.ch>.\nCopyright © 2020 Gridfinity, LLC. <admin@gridfinity.com>.\nCopyright © 2020 Jeffrey H. Johnson <jeff@gridfinity.com>.\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including, without limitation, the rights\nto use, copy, modify, merge, publish, distribute, sub-license, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice, and this permission notice, shall be\nincluded in all copies, or substantial portions, of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING, BUT NOT LIMITED TO, THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF, OR IN CONNECTION WITH THE SOFTWARE, OR THE USE OR OTHER DEALINGS IN\nTHE SOFTWARE.\n",

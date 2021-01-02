@@ -73,7 +73,9 @@ func (
 		h.entries,
 		x.(entry),
 	)
-	n := len(h.entries)
+	n := len(
+		h.entries,
+	)
 	h.entries[n-1].s.updaterIdx = n - 1
 }
 
@@ -154,7 +156,9 @@ func (
 		hlen := h.Len()
 		for i := 0; i < hlen; i++ {
 			entry := &h.entries[0]
-			if !time.Now().Before(entry.ts) {
+			if !time.Now().Before(
+				entry.ts,
+			) {
 				interval := entry.s.update()
 				entry.ts = time.Now().Add(
 					interval,

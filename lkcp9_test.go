@@ -47,7 +47,9 @@ func TestGoEnvironment(
 			runtime.GOOS,
 			runtime.GOARCH,
 			runtime.NumCPU(),
-			runtime.GOMAXPROCS(-1),
+			runtime.GOMAXPROCS(
+				-1,
+			),
 		),
 	)
 }

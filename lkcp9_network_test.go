@@ -155,7 +155,9 @@ func (
 		delay += rand.Int() % (p.rttmax - p.rttmin)
 	}
 	pkt.setts(
-		p.current + int32(delay),
+		p.current + int32(
+			delay,
+		),
 	)
 	if peer == 0 {
 		p.p12.PushBack(
@@ -270,7 +272,9 @@ func test(
 		output2,
 	)
 
-	current := uint32(iclock())
+	current := uint32(
+		iclock(),
+	)
 	slap := current + 20
 	index := 0
 	next := 0
@@ -340,7 +344,9 @@ func test(
 		time.Sleep(
 			(1 * time.Millisecond),
 		)
-		current = uint32(iclock())
+		current = uint32(
+			iclock(),
+		)
 		kcp1.Update()
 		kcp2.Update()
 
@@ -351,13 +357,17 @@ func test(
 			binary.Write(
 				buf,
 				binary.LittleEndian,
-				uint32(index),
+				uint32(
+					index,
+				),
 			)
 			index++
 			binary.Write(
 				buf,
 				binary.LittleEndian,
-				uint32(current),
+				uint32(
+					current,
+				),
 			)
 			kcp1.Send(
 				buf.Bytes(),
@@ -397,9 +407,10 @@ func test(
 		}
 
 		for {
-			hr = int32(kcp2.Recv(
-				buffer[:10],
-			),
+			hr = int32(
+				kcp2.Recv(
+					buffer[:10],
+				),
 			)
 			if hr < 0 {
 				break
@@ -419,9 +430,10 @@ func test(
 		}
 
 		for {
-			hr = int32(kcp1.Recv(
-				buffer[:10],
-			),
+			hr = int32(
+				kcp1.Recv(
+					buffer[:10],
+				),
 			)
 			buf := bytes.NewReader(
 				buffer,
@@ -429,8 +441,7 @@ func test(
 			if hr < 0 {
 				break
 			}
-			var sn uint32
-			var ts, rtt uint32
+			var ts, sn, rtt uint32
 			binary.Read(
 				buf,
 				binary.LittleEndian,
@@ -441,9 +452,13 @@ func test(
 				binary.LittleEndian,
 				&ts,
 			)
-			rtt = uint32(current) - ts
+			rtt = uint32(
+				current,
+			) - ts
 
-			if sn != uint32(next) {
+			if sn != uint32(
+				next,
+			) {
 				println(
 					"ERROR sn ",
 					count,
@@ -457,8 +472,12 @@ func test(
 			next++
 			sumrtt += rtt
 			count++
-			if rtt > uint32(maxrtt) {
-				maxrtt = int(rtt)
+			if rtt > uint32(
+				maxrtt,
+			) {
+				maxrtt = int(
+					rtt,
+				)
 			}
 
 		}

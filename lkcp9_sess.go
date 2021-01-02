@@ -52,9 +52,9 @@ const (
 	crcSize         = 4
 	cryptHeaderSize = nonceSize + crcSize
 	// KcpMtuLimit ...
-	KcpMtuLimit   = 1500
+	KcpMtuLimit   = 9000
 	rxFECMulti    = 3
-	acceptBacklog = 128
+	acceptBacklog = 256
 )
 
 const (
@@ -135,7 +135,7 @@ func newUDPSession(
 		chan struct{},
 	)
 	sess.nonce = new(
-		KcpNonceHH,
+		KcpNonce,
 	)
 	sess.nonce.Init()
 	sess.chReadEvent = make(
@@ -276,7 +276,9 @@ func (
 				)
 				return size, nil
 			}
-			if cap(s.recvbuf) < size {
+			if cap(
+				s.recvbuf,
+			) < size {
 				s.recvbuf = make(
 					[]byte,
 					size,
@@ -389,7 +391,9 @@ func (
 				}
 			}
 
-			if s.Kcp.WaitSnd() >= int(s.Kcp.sndWnd) || !s.writeDelay {
+			if s.Kcp.WaitSnd() >= int(
+				s.Kcp.sndWnd,
+			) || !s.writeDelay {
 				s.Kcp.Flush(
 					false,
 				)
@@ -397,7 +401,9 @@ func (
 			s.mu.Unlock()
 			atomic.AddUint64(
 				&DefaultSnsi.KcpBytesSent,
-				uint64(n),
+				uint64(
+					n,
+				),
 			)
 			return n, nil
 		}
@@ -463,7 +469,9 @@ func (
 	s.isClosed = true
 	atomic.AddUint64(
 		&DefaultSnsi.KcpNowEstablished,
-		^uint64(0),
+		^uint64(
+			0,
+		),
 	)
 	if s.l == nil {
 		return s.conn.Close()
@@ -778,11 +786,15 @@ func (
 	}
 	atomic.AddUint64(
 		&DefaultSnsi.KcpOutputPackets,
-		uint64(npkts),
+		uint64(
+			npkts,
+		),
 	)
 	atomic.AddUint64(
 		&DefaultSnsi.KcpOutputBytes,
-		uint64(nbytes),
+		uint64(
+			nbytes,
+		),
 	)
 }
 
@@ -794,7 +806,10 @@ func (
 	s.mu.Lock()
 	waitsnd := s.Kcp.WaitSnd()
 	interval = time.Duration(
-		s.Kcp.Flush(false)) * time.Millisecond
+		s.Kcp.Flush(
+			false,
+		),
+	) * time.Millisecond
 	if s.Kcp.WaitSnd() < waitsnd {
 		s.notifyWriteEvent()
 	}
@@ -829,7 +844,9 @@ func (
 
 func (
 	s *UDPSession,
-) notifyWriteError(err error) {
+) notifyWriteError(
+	err error,
+) {
 	select {
 	case s.chWriteError <- err:
 	default:
@@ -983,9 +1000,12 @@ func (
 	)
 	atomic.AddUint64(
 		&DefaultSnsi.KcpInputBytes,
-		uint64(len(
-			data,
-		)))
+		uint64(
+			len(
+				data,
+			),
+		),
+	)
 	if fecParityShards > 0 {
 		atomic.AddUint64(
 			&DefaultSnsi.KcpFECParityShards,
@@ -1199,7 +1219,11 @@ func (
 ) {
 	var timeout <-chan time.Time
 	if tdeadline, ok := l.rd.Load().(time.Time); ok && !tdeadline.IsZero() {
-		timeout = time.After(time.Since(tdeadline))
+		timeout = time.After(
+			time.Since(
+				tdeadline,
+			),
+		)
 	}
 
 	select {
@@ -1311,8 +1335,12 @@ func (
 }
 
 // Listen listens for incoming Kcp packets addressed to our local address (laddr) via "udp"
-func Listen(laddr string) (
-	net.Listener, error) {
+func Listen(
+	laddr string,
+) (
+	net.Listener,
+	error,
+) {
 	return ListenWithOptions(
 		laddr,
 		nil,
@@ -1332,25 +1360,28 @@ func ListenWithOptions(
 	*Listener,
 	error,
 ) {
-	udpaddr, err := net.ResolveUDPAddr(
+	udpaddr,
+		err := net.ResolveUDPAddr(
 		"udp",
 		laddr,
 	)
 	if err != nil {
-		return nil, errors.Wrap(
-			err,
-			"net.ResolveUDPAddr",
-		)
+		return nil,
+			errors.Wrap(
+				err,
+				"net.ResolveUDPAddr",
+			)
 	}
 	conn, err := net.ListenUDP(
 		"udp",
 		udpaddr,
 	)
 	if err != nil {
-		return nil, errors.Wrap(
-			err,
-			"net.ListenUDP",
-		)
+		return nil,
+			errors.Wrap(
+				err,
+				"net.ListenUDP",
+			)
 	}
 	return ServeConn(
 		block,
@@ -1391,7 +1422,10 @@ func ServeConn(
 	l.parityShards = parityShards
 	l.block = block
 	l.FecDecoder = KcpNewDECDecoder(
-		rxFECMulti*(dataShards+parityShards), dataShards, parityShards)
+		rxFECMulti*(dataShards+parityShards),
+		dataShards,
+		parityShards,
+	)
 	if l.block != nil {
 		l.headerSize += cryptHeaderSize
 	}
@@ -1488,7 +1522,9 @@ func NewConn(
 		&convid,
 	)
 	if err != nil {
-		panic("binary.Read failure")
+		panic(
+			"binary.Read failure",
+		)
 	}
 	return newUDPSession(
 		convid,

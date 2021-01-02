@@ -122,18 +122,17 @@ func (
 	for i := n; i >= 0; i-- {
 		if in.seqid() == dec.rx[i].seqid() {
 			return nil
-		} else if _itimediff(in.seqid(), dec.rx[i].seqid()) > 0 {
+		} else if _itimediff(
+			in.seqid(),
+			dec.rx[i].seqid(),
+		) > 0 {
 			insertIdx = i + 1
 			break
 		}
 	}
 
 	// make a copy
-	pkt := FecPacket(
-		KxmitBuf.Get().([]byte)[:len(
-			in,
-		)],
-	)
+	pkt := FecPacket(KxmitBuf.Get().([]byte)[:len(in)])
 	copy(
 		pkt,
 		in,
@@ -193,8 +192,12 @@ func (
 				seqid,
 				shardBegin,
 			) >= 0 {
-				shards[seqid%uint32(dec.shardSize)] = dec.rx[i].data()
-				shardsflag[seqid%uint32(dec.shardSize)] = true
+				shards[seqid%uint32(
+					dec.shardSize,
+				)] = dec.rx[i].data()
+				shardsflag[seqid%uint32(
+					dec.shardSize,
+				)] = true
 				numshard++
 				if dec.rx[i].flag() == KTypeData {
 					numDataShard++
@@ -276,7 +279,9 @@ func (
 	for i := first; i < first+n; i++ {
 		// TODO(jhj): Switch to pointer to avoid allocation.
 		KxmitBuf.Put(
-			[]byte(q[i]),
+			[]byte(
+				q[i],
+			),
 		)
 	}
 
@@ -287,7 +292,9 @@ func (
 		q[first:],
 		q[first+n:],
 	)
-	return q[:len(q)-n]
+	return q[:len(
+		q,
+	)-n]
 }
 
 type (
@@ -310,7 +317,11 @@ type (
 )
 
 // KcpNewDECEncoder ...
-func KcpNewDECEncoder(dataShards, parityShards, offset int) *FecEncoder {
+func KcpNewDECEncoder(
+	dataShards,
+	parityShards,
+	offset int,
+) *FecEncoder {
 	if dataShards <= 0 || parityShards <= 0 {
 		return nil
 	}
@@ -365,9 +376,10 @@ func (
 	)
 	binary.LittleEndian.PutUint16(
 		b[enc.payloadOffset:],
-		uint16(len(
-			b[enc.payloadOffset:],
-		),
+		uint16(
+			len(
+				b[enc.payloadOffset:],
+			),
 		),
 	)
 	sz := len(

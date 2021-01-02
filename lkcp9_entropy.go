@@ -15,7 +15,6 @@ import (
 	"io"
 
 	hh "github.com/minio/highwayhash"
-	// hh "crypto/md5"
 )
 
 // Entropy defines a entropy source
@@ -26,20 +25,20 @@ type Entropy interface {
 	)
 }
 
-// KcpNonceHH ...
-type KcpNonceHH struct {
+// KcpNonce ...
+type KcpNonce struct {
 	seed [hh.Size]byte
 }
 
 // Init ...
 func (
-	n *KcpNonceHH,
+	n *KcpNonce,
 ) Init() {
 }
 
 // Fill ...
 func (
-	n *KcpNonceHH,
+	n *KcpNonce,
 ) Fill(
 	nonce []byte,
 ) {
@@ -50,12 +49,14 @@ func (
 			n.seed[:],
 		)
 		if err != nil {
-			panic("io.ReadFull failure")
+			panic(
+				"io.ReadFull failure",
+			)
 		}
 	}
 	n.seed = hh.Sum(
 		n.seed[:],
-		n.seed[:],
+		nonce[:],
 	)
 	copy(
 		nonce,

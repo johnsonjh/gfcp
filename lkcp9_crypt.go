@@ -25,8 +25,38 @@ type BlockCrypt interface {
 type noneBlockCrypt struct{}
 
 // NewNoneBlockCrypt == NULL encryption
-func NewNoneBlockCrypt(_ []byte) (BlockCrypt, error) {
-	return new(noneBlockCrypt), nil
+func NewNoneBlockCrypt(
+	_ []byte,
+) (
+	BlockCrypt,
+	error,
+) {
+	return new(
+			noneBlockCrypt,
+		),
+		nil
 }
-func (c *noneBlockCrypt) Encrypt(dst, src []byte) { copy(dst, src) }
-func (c *noneBlockCrypt) Decrypt(dst, src []byte) { copy(dst, src) }
+
+func (
+	c *noneBlockCrypt,
+) Encrypt(
+	dst,
+	src []byte,
+) {
+	copy(
+		dst,
+		src,
+	)
+}
+
+func (
+	c *noneBlockCrypt,
+) Decrypt(
+	dst,
+	src []byte,
+) {
+	copy(
+		dst,
+		src,
+	)
+}

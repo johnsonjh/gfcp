@@ -103,7 +103,10 @@ func dialEcho() (
 		true,
 	)
 	sess.SetNoDelay(
-		1, 10, 2, 1,
+		1,
+		10,
+		2,
+		1,
 	)
 	sess.SetMtu(
 		1400,
@@ -120,9 +123,11 @@ func dialEcho() (
 	sess.SetACKNoDelay(
 		false,
 	)
-	sess.SetDeadline(time.Now().Add(
-		time.Minute,
-	))
+	sess.SetDeadline(
+		time.Now().Add(
+			time.Minute,
+		),
+	)
 
 	return sess, err
 }
@@ -152,12 +157,16 @@ func dialSink() (
 		16 * 1024 * 1024,
 	)
 	sess.SetWriteBuffer(
-		16 * 1024 * 1024)
+		16 * 1024 * 1024,
+	)
 	sess.SetStreamMode(
 		true,
 	)
 	sess.SetNoDelay(
-		1, 10, 2, 1,
+		1,
+		10,
+		2,
+		1,
 	)
 	sess.SetMtu(
 		1400,
@@ -248,16 +257,26 @@ func echoServer() {
 	}
 	go func() {
 		Kcplistener := l.(*lkcp9.Listener)
-		Kcplistener.SetReadBuffer(4 * 1024 * 1024)
-		Kcplistener.SetWriteBuffer(4 * 1024 * 1024)
-		Kcplistener.SetDSCP(46)
+		Kcplistener.SetReadBuffer(
+			4 * 1024 * 1024,
+		)
+		Kcplistener.SetWriteBuffer(
+			4 * 1024 * 1024,
+		)
+		Kcplistener.SetDSCP(
+			46,
+		)
 		for {
 			s, err := l.Accept()
 			if err != nil {
 				return
 			}
-			s.(*lkcp9.UDPSession).SetReadBuffer(4 * 1024 * 1024)
-			s.(*lkcp9.UDPSession).SetWriteBuffer(4 * 1024 * 1024)
+			s.(*lkcp9.UDPSession).SetReadBuffer(
+				4 * 1024 * 1024,
+			)
+			s.(*lkcp9.UDPSession).SetWriteBuffer(
+				4 * 1024 * 1024,
+			)
 			go handleEcho(s.(*lkcp9.UDPSession))
 		}
 	}()
@@ -335,10 +354,14 @@ func handleEcho(
 		false,
 	)
 	conn.SetReadDeadline(
-		time.Now().Add(time.Hour),
+		time.Now().Add(
+			time.Minute,
+		),
 	)
 	conn.SetWriteDeadline(
-		time.Now().Add(time.Hour),
+		time.Now().Add(
+			time.Minute,
+		),
 	)
 	buf := make(
 		[]byte,
@@ -386,10 +409,14 @@ func handleSink(
 		false,
 	)
 	conn.SetReadDeadline(
-		time.Now().Add(time.Hour),
+		time.Now().Add(
+			time.Minute,
+		),
 	)
 	conn.SetWriteDeadline(
-		time.Now().Add(time.Hour),
+		time.Now().Add(
+			time.Minute,
+		),
 	)
 	buf := make(
 		[]byte,
@@ -451,12 +478,16 @@ func TestTimeout(
 		10,
 	)
 	cli.SetDeadline(
-		time.Now().Add(time.Second),
+		time.Now().Add(
+			time.Second,
+		),
 	)
 	<-time.After(
 		2 * time.Second,
 	)
-	n, err := cli.Read(buf)
+	n, err := cli.Read(
+		buf,
+	)
 	if n != 0 || err == nil {
 		t.Fail()
 	}
@@ -494,7 +525,9 @@ func TestSendRecv(
 			i,
 		)
 		cli.Write(
-			[]byte(msg),
+			[]byte(
+				msg,
+			),
 		)
 		if n, err := cli.Read(
 			buf,
@@ -564,7 +597,9 @@ func TestSendVector(
 				buf[:n],
 			) != msg {
 				t.Error(
-					string(buf[:n]),
+					string(
+						buf[:n],
+					),
 					msg,
 				)
 			}
@@ -694,9 +729,10 @@ func TestParallel(
 ) {
 	concurrent := 1024
 	if runtime.GOOS == "darwin" {
-		t.Log("\n--- WARN: Detected macOS: Lowering concurrency to 128")
+		t.Log(
+			"\n--- WARN: Detected macOS: Lowering concurrency to 128",
+		)
 		concurrent = 128
-		return
 	}
 	t.Log(
 		fmt.Sprintf(
@@ -760,6 +796,15 @@ func parallel_client(
 	return
 }
 
+func BenchmarkEchoSpeed1K(
+	b *testing.B,
+) {
+	speedclient(
+		b,
+		1*1024,
+	)
+}
+
 func BenchmarkEchoSpeed4K(
 	b *testing.B,
 ) {
@@ -781,8 +826,18 @@ func BenchmarkEchoSpeed64K(
 func BenchmarkEchoSpeed256K(
 	b *testing.B,
 ) {
-	speedclient(b,
+	speedclient(
+		b,
 		256*1024,
+	)
+}
+
+func BenchmarkEchoSpeed512K(
+	b *testing.B,
+) {
+	speedclient(
+		b,
+		512*1024,
 	)
 }
 
@@ -792,6 +847,24 @@ func BenchmarkEchoSpeed1M(
 	speedclient(
 		b,
 		1*1024*1024,
+	)
+}
+
+func BenchmarkEchoSpeed4M(
+	b *testing.B,
+) {
+	speedclient(
+		b,
+		4*1024*1024,
+	)
+}
+
+func BenchmarkEchoSpeed8M(
+	b *testing.B,
+) {
+	speedclient(
+		b,
+		8*1024*1024,
 	)
 }
 
@@ -815,7 +888,18 @@ func speedclient(
 		b.Fail()
 	}
 	b.SetBytes(
-		int64(nbytes),
+		int64(
+			nbytes,
+		),
+	)
+}
+
+func BenchmarkSinkSpeed1K(
+	b *testing.B,
+) {
+	sinkclient(
+		b,
+		1*1024,
 	)
 }
 
@@ -846,12 +930,39 @@ func BenchmarkSinkSpeed256K(
 	)
 }
 
+func BenchmarkSinkSpeed512K(
+	b *testing.B,
+) {
+	sinkclient(
+		b,
+		512*1024,
+	)
+}
+
 func BenchmarkSinkSpeed1M(
 	b *testing.B,
 ) {
 	sinkclient(
 		b,
 		1*1024*1024,
+	)
+}
+
+func BenchmarkSinkSpeed4M(
+	b *testing.B,
+) {
+	sinkclient(
+		b,
+		4*1024*1024,
+	)
+}
+
+func BenchmarkSinkSpeed8M(
+	b *testing.B,
+) {
+	sinkclient(
+		b,
+		8*1024*1024,
 	)
 }
 
@@ -872,7 +983,9 @@ func sinkclient(
 		b.N,
 	)
 	b.SetBytes(
-		int64(nbytes),
+		int64(
+			nbytes,
+		),
 	)
 }
 
@@ -937,16 +1050,16 @@ func TestSnsi(
 	t.Log(
 		*lkcp9.DefaultSnsi.Copy(),
 	)
-	//t.Log(
-	//	lkcp9.DefaultSnsi.Header(),
-	//)
+	t.Log(
+		lkcp9.DefaultSnsi.Header(),
+	)
 	t.Log(
 		lkcp9.DefaultSnsi.ToSlice(),
 	)
 	lkcp9.DefaultSnsi.Reset()
-	//t.Log(
-	//	lkcp9.DefaultSnsi.ToSlice(),
-	//)
+	t.Log(
+		lkcp9.DefaultSnsi.ToSlice(),
+	)
 }
 
 func TestListenerClose(
@@ -980,7 +1093,7 @@ func TestListenerClose(
 		),
 	)
 	time.Sleep(
-		50 * time.Millisecond,
+		10 * time.Millisecond,
 	)
 	if _, err := l.Accept(); err == nil {
 		t.Fail()

@@ -31,9 +31,13 @@ func TestNone(
 	defer u.Leakplug(
 		t,
 	)
-	bc, err := lkcp9.NewNoneBlockCrypt(pass[:32])
+	bc, err := lkcp9.NewNoneBlockCrypt(
+		pass[:32],
+	)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(
+			err,
+		)
 	}
 	cryptTest(
 		t,
@@ -94,7 +98,9 @@ func BenchmarkNone(
 		pass[:32],
 	)
 	if err != nil {
-		b.Fatal(err)
+		b.Fatal(
+			err,
+		)
 	}
 	benchCrypt(
 		b,
@@ -124,9 +130,10 @@ func benchCrypt(
 	)
 	b.ReportAllocs()
 	b.SetBytes(
-		int64(len(
-			enc,
-		) * 2,
+		int64(
+			len(
+				enc,
+			) * 2,
 		),
 	)
 	b.ResetTimer()
@@ -166,14 +173,28 @@ func BenchmarkCRC32(
 func BenchmarkCsprngSystem(
 	b *testing.B,
 ) {
-	data := make([]byte, hh.Size)
-	b.SetBytes(int64(len(data)))
+	data := make(
+		[]byte,
+		hh.Size,
+	)
+	b.SetBytes(
+		int64(
+			len(
+				data,
+			),
+		),
+	)
 	for i := 0; i < b.N; i++ {
-		io.ReadFull(rand.Reader, data)
+		io.ReadFull(
+			rand.Reader,
+			data,
+		)
 	}
 }
 
-func BenchmarkCsprngHH(b *testing.B) {
+func BenchmarkCsprng(
+	b *testing.B,
+) {
 	var data [hh.Size]byte
 	b.SetBytes(
 		hh.Size,
@@ -186,10 +207,10 @@ func BenchmarkCsprngHH(b *testing.B) {
 	}
 }
 
-func BenchmarkCsprngKcpNonceHH(
+func BenchmarkCsprngKcpNonce(
 	b *testing.B,
 ) {
-	var ng lkcp9.KcpNonceHH
+	var ng lkcp9.KcpNonce
 	ng.Init()
 	b.SetBytes(
 		hh.Size,
