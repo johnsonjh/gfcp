@@ -23,9 +23,11 @@ SOFTWARE, OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ## Report a security vulnerability
 
-- Create a new issue at [Gridfinity GitLab](https://gitlab.gridfinity.com/gridfinity/gfcp/-/issues)
+- Create a new issue at
+  [Gridfinity GitLab](https://gitlab.gridfinity.com/gridfinity/gfcp/-/issues)
 
-  - Check "_This issue is confidential and should only be visible to team members with at least Reporter access._"
+  - Check "_This issue is confidential and should only be visible to team
+    members with at least Reporter access._"
 
   - Or, send a **PGP-encrypted** email to <mailto:jeff@gridfinity.com>
 
