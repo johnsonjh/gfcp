@@ -183,6 +183,7 @@ var vnet *LatencySimulator
 
 func test(
 	mode int,
+	t *testing.T,
 ) {
 	vnet = &LatencySimulator{}
 	vnet.Init(
@@ -201,6 +202,9 @@ func test(
 			buf,
 			size,
 		) != 1 {
+			t.Fatal(
+				"vnet.send failure",
+			)
 		}
 	}
 	output2 := func(
@@ -212,6 +216,9 @@ func test(
 			buf,
 			size,
 		) != 1 {
+			t.Fatal(
+				"vnet.send failure",
+			)
 		}
 	}
 	kcp1 := lkcp9.NewKCP(
@@ -430,12 +437,15 @@ func test(
 func TestNetwork(t *testing.T) {
 	test(
 		0,
+		t,
 	)
 	test(
 		1,
+		t,
 	)
 	test(
 		2,
+		t,
 	)
 }
 

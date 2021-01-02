@@ -25,7 +25,7 @@ type BlockCrypt interface {
 type noneBlockCrypt struct{}
 
 // NewNoneBlockCrypt == NULL encryption
-func NewNoneBlockCrypt(key []byte) (BlockCrypt, error) {
+func NewNoneBlockCrypt(_ []byte) (BlockCrypt, error) {
 	return new(noneBlockCrypt), nil
 }
 func (c *noneBlockCrypt) Encrypt(dst, src []byte) { copy(dst, src) }

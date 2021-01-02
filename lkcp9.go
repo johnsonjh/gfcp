@@ -1357,9 +1357,9 @@ func (
 		[]byte,
 		mtu,
 	)
-	if buffer == nil {
+	/*if buffer == nil {
 		return -2
-	}
+	}*/ // XXX(jhj): buffer can't be nil
 	Kcp.mtu = uint32(mtu)
 	Kcp.mss = Kcp.mtu - IKcpOverhead - uint32(Kcp.reserved)
 	Kcp.buffer = buffer
