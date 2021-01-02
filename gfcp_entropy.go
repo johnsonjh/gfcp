@@ -25,20 +25,20 @@ type Entropy interface {
 	)
 }
 
-// GFcpNonce ...
-type GFcpNonce struct {
+// Nonce ...
+type Nonce struct {
 	seed [hh.Size]byte
 }
 
 // Init ...
 func (
-	n *GFcpNonce,
+	n *Nonce,
 ) Init() {
 }
 
 // Fill ...
 func (
-	n *GFcpNonce,
+	n *Nonce,
 ) Fill(
 	nonce []byte,
 ) {

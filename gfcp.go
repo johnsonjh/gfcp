@@ -940,7 +940,7 @@ func (
 		inSegs,
 	)
 	if flag != 0 && regular {
-		current := GFcpCurrentMs()
+		current := CurrentMs()
 		if _itimediff(
 			current,
 			latest,
@@ -1071,7 +1071,7 @@ func (
 		return GFcp.interval
 	}
 	if GFcp.rmtWnd == 0 {
-		current := GFcpCurrentMs()
+		current := CurrentMs()
 		if GFcp.probeWait == 0 {
 			GFcp.probeWait = GfcpProbeInit
 			GFcp.tsProbe = current + GFcp.probeWait
@@ -1152,7 +1152,7 @@ func (
 	if GFcp.fastresend <= 0 {
 		resent = 0xFFFFFFFF
 	}
-	current := GFcpCurrentMs()
+	current := CurrentMs()
 	var change,
 		lost,
 		lostSegs,
@@ -1203,7 +1203,7 @@ func (
 			earlyGFcpRestransmittedSegments++
 		}
 		if needsend {
-			current = GFcpCurrentMs()
+			current = CurrentMs()
 			GFcpSegment.Kxmit++
 			GFcpSegment.ts = current
 			GFcpSegment.wnd = GFcpSeg.wnd
@@ -1298,7 +1298,7 @@ func (
 	GFcp *GFCP,
 ) Update() {
 	var slap int32
-	current := GFcpCurrentMs()
+	current := CurrentMs()
 	if GFcp.updated == 0 {
 		GFcp.updated = 1
 		GFcp.tsFlush = current
@@ -1335,7 +1335,7 @@ func (
 func (
 	GFcp *GFCP,
 ) Check() uint32 {
-	current := GFcpCurrentMs()
+	current := CurrentMs()
 	tsFlush := GFcp.tsFlush
 	tmFlush := int32(
 		math.MaxInt32,
@@ -1525,15 +1525,9 @@ func (
 }
 
 func init() {
-	// This actually stops the garbage collector from excessively overallocating.
-	// This is set this way on purpose. Leave this shit alone. GTFO. Serious now.
-	// I know you want to fuck around. Too bad that you're also fucking retarded.
-	// I actually spent hours of real time, doing things like hot-spot profiling,
-	// running simulations, and doing regression testing, so, just fuck yourself.
 	debug.SetGCPercent(
-		2000,
+		180,
 	)
-	// Register the MIT License
 	gfcpLegal.RegisterLicense(
 		"\nThe MIT License (MIT)\n\nCopyright © 2015 Daniel Fu <daniel820313@gmail.com>.\nCopyright © 2019 Loki 'l0k18' Verloren <stalker.loki@protonmail.ch>.\nCopyright © 2020 Gridfinity, LLC. <admin@gridfinity.com>.\nCopyright © 2020 Jeffrey H. Johnson <jeff@gridfinity.com>.\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including, without limitation, the rights\nto use, copy, modify, merge, publish, distribute, sub-license, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice, and this permission notice, shall be\nincluded in all copies, or substantial portions, of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING, BUT NOT LIMITED TO, THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF, OR IN CONNECTION WITH THE SOFTWARE, OR THE USE OR OTHER DEALINGS IN\nTHE SOFTWARE.\n",
 	)

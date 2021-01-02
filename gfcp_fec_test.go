@@ -26,7 +26,7 @@ func BenchmarkFECDecode(
 		paritySize = 3
 		payLoad    = 1500
 	)
-	decoder := gfcp.GFcpNewDECDecoder(
+	decoder := gfcp.NewFECDecoder(
 		1024,
 		dataSize,
 		paritySize,
@@ -74,7 +74,7 @@ func BenchmarkFECEncode(
 	b.SetBytes(
 		payLoad,
 	)
-	Encoder := gfcp.GFcpNewDECEncoder(
+	Encoder := gfcp.NewFECEncoder(
 		dataSize,
 		paritySize,
 		0,

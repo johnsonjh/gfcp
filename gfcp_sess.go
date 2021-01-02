@@ -132,7 +132,7 @@ func newUDPSession(
 		chan struct{},
 	)
 	sess.nonce = new(
-		GFcpNonce,
+		Nonce,
 	)
 	sess.nonce.Init()
 	sess.chReadEvent = make(
@@ -158,12 +158,12 @@ func newUDPSession(
 		[]byte,
 		GFcpMtuLimit,
 	)
-	sess.FecDecoder = GFcpNewDECDecoder(
+	sess.FecDecoder = NewFECDecoder(
 		rxFECMulti*(dataShards+parityShards),
 		dataShards,
 		parityShards,
 	)
-	sess.FecEncoder = GFcpNewDECEncoder(
+	sess.FecEncoder = NewFECEncoder(
 		dataShards,
 		parityShards,
 		0,
@@ -1314,7 +1314,7 @@ func ServeConn(
 	)
 	l.dataShards = dataShards
 	l.parityShards = parityShards
-	l.FecDecoder = GFcpNewDECDecoder(
+	l.FecDecoder = NewFECDecoder(
 		rxFECMulti*(dataShards+parityShards),
 		dataShards,
 		parityShards,
@@ -1424,7 +1424,7 @@ func NewConn(
 
 var refTime = time.Now()
 
-// GFcpCurrentMs ...
-func GFcpCurrentMs() uint32 {
+// CurrentMs ...
+func CurrentMs() uint32 {
 	return uint32(time.Since(refTime) / time.Millisecond)
 }

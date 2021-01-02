@@ -64,8 +64,8 @@ type FecDecoder struct {
 	codec        reedsolomon.Encoder
 }
 
-// GFcpNewDECDecoder ...
-func GFcpNewDECDecoder(
+// NewFECDecoder ...
+func NewFECDecoder(
 	rxlimit,
 	dataShards,
 	parityShards int,
@@ -316,8 +316,8 @@ type (
 	}
 )
 
-// GFcpNewDECEncoder ...
-func GFcpNewDECEncoder(
+// NewFECEncoder ...
+func NewFECEncoder(
 	dataShards,
 	parityShards,
 	offset int,

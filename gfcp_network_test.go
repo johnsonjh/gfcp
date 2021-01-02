@@ -24,7 +24,7 @@ import (
 )
 
 func iclock() int32 {
-	return int32(gfcp.GFcpCurrentMs())
+	return int32(gfcp.CurrentMs())
 }
 
 type DelayPacket struct {
@@ -539,7 +539,7 @@ func BenchmarkFlush(
 	)
 	for k := range GFcp.SndBuf {
 		GFcp.SndBuf[k].Kxmit = 1
-		GFcp.SndBuf[k].GFcpResendTs = gfcp.GFcpCurrentMs() + 10000
+		GFcp.SndBuf[k].GFcpResendTs = gfcp.CurrentMs() + 10000
 	}
 	b.ResetTimer()
 	b.ReportAllocs()
