@@ -490,9 +490,9 @@ func test(
 	ts1 = iclock() - ts1
 
 	names := []string{
-		"\n=== Test 1/3:\tConfiguration: Defaulted",
-		"\n=== Test 2/3:\tConfiguration: Normalize",
-		"\n=== Test 3/3:\tConfiguration: Optimized",
+		"=== Test 1/3:\tConfiguration: Default",
+		"=== Test 2/3:\tConfiguration: Regular",
+		"=== Test 3/3:\tConfiguration: Tweaked",
 	}
 	fmt.Printf(
 		"\n%s\n\t\tElapsed Time:\t%d ms",
@@ -500,7 +500,7 @@ func test(
 		ts1,
 	)
 	fmt.Printf(
-		"\n\t\tAverage RTT:\t%d ms\n\t\tMaximum RTT:\t%d ms\n\n",
+		"\n\t\tAverage RTT:\t%d ms\n\t\tMaximum RTT:\t%d ms\n",
 		int(sumrtt/uint32(count)),
 		maxrtt,
 	)
@@ -534,12 +534,12 @@ func BenchmarkFlush(
 		) {
 		})
 	GFcp.SndBuf = make(
-		[]gfcp.GFcpSegment,
-		1024,
+		[]gfcp.Segment,
+		2048,
 	)
 	for k := range GFcp.SndBuf {
 		GFcp.SndBuf[k].Kxmit = 1
-		GFcp.SndBuf[k].GFcpResendTs = gfcp.CurrentMs() + 10000
+		GFcp.SndBuf[k].GFcpResendTs = gfcp.CurrentMs() + 1000
 	}
 	b.ResetTimer()
 	b.ReportAllocs()

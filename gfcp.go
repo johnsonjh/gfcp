@@ -22,10 +22,10 @@ import (
 
 // Gfcp protocol constants
 const (
-	GfcpRtoNdl     = 10  // GfcpRtoNdl:	NoDelay min RTO
-	GfcpRtoMin     = 100 // GfcpRtoMin:	Regular min RTO
-	GfcpRtoDef     = 250
-	GfcpRtoMax     = 45000
+	GfcpRtoNdl     = 20  // GfcpRtoNdl:	NoDelay min RTO
+	GfcpRtoMin     = 220 // GfcpRtoMin:	Regular min RTO
+	GfcpRtoDef     = 340
+	GfcpRtoMax     = 10000
 	GfcpCmdPush    = 81 // GfcpCmdPush:	Push data
 	GfcpCmdAck     = 82 // GfcpCmdAck:	Ack
 	GfcpCmdWask    = 83 // GfcpCmdWask:	Get Window Size
@@ -34,15 +34,15 @@ const (
 	GfcpAskTell    = 2  // GfcpAskTell:	Need to send GfcpCmdWins
 	GfcpWndSnd     = 64
 	GfcpWndRcv     = 64
-	GfcpMtuDef     = 1500
-	GfcpAckFast    = 3
+	GfcpMtuDef     = 1480
+	GfcpAckFast    = 2
 	GfcpInterval   = 70
 	GfcpOverhead   = 24
-	GfcpDeadLink   = 20
-	GfcpThreshInit = 2
-	GfcpThreshMin  = 1
-	GfcpProbeInit  = 5000  // 5s initial probe window
-	GfcpProbeLimit = 30000 // 30s hard probe timeout
+	GfcpDeadLink   = 12
+	GfcpThreshInit = 3
+	GfcpThreshMin  = 2
+	GfcpProbeInit  = 7000  // 7s initial probe window
+	GfcpProbeLimit = 90000 // 90s hard probe timeout
 )
 
 type outputCallback func(
@@ -149,8 +149,8 @@ func _itimediff(
 	return (int32)(later - earlier)
 }
 
-// GFcpSegment structure
-type GFcpSegment struct {
+// Segment structure
+type Segment struct {
 	conv         uint32
 	cmd          uint8
 	frg          uint8
@@ -167,7 +167,7 @@ type GFcpSegment struct {
 }
 
 func (
-	GFcpSeg *GFcpSegment,
+	GFcpSeg *Segment,
 ) encode(
 	ptr []byte,
 ) []byte {
@@ -224,10 +224,10 @@ type GFCP struct {
 	deadLink, incr                      uint32
 	fastresend                          int32
 	nocwnd, stream                      int32
-	sndQueue                            []GFcpSegment
-	rcvQueue                            []GFcpSegment
-	SndBuf                              []GFcpSegment
-	rcvBuf                              []GFcpSegment
+	sndQueue                            []Segment
+	rcvQueue                            []Segment
+	SndBuf                              []Segment
+	rcvBuf                              []Segment
 	acklist                             []ackItem
 	buffer                              []byte
 	reserved                            int
@@ -272,7 +272,7 @@ func (
 ) newSegment(
 	size int,
 ) (
-	GFcpSeg GFcpSegment,
+	GFcpSeg Segment,
 ) {
 	GFcpSeg.data = KxmitBuf.Get().([]byte)[:size]
 	return
@@ -281,7 +281,7 @@ func (
 func (
 	GFcp *GFCP,
 ) delSegment(
-	GFcpSeg *GFcpSegment,
+	GFcpSeg *Segment,
 ) {
 	if GFcpSeg.data != nil {
 		KxmitBuf.Put(
@@ -706,7 +706,7 @@ func (
 func (
 	GFcp *GFCP,
 ) parseData(
-	newGFcpSeg GFcpSegment,
+	newGFcpSeg Segment,
 ) bool {
 	sn := newGFcpSeg.sn
 	if _itimediff(
@@ -756,7 +756,7 @@ func (
 		} else {
 			GFcp.rcvBuf = append(
 				GFcp.rcvBuf,
-				GFcpSegment{},
+				Segment{},
 			)
 			copy(
 				GFcp.rcvBuf[insertIdx+1:],
@@ -793,7 +793,7 @@ func (
 }
 
 // Input receives a (low-level) UDP packet, and determinines if
-// a complete packet has processsedd (not by the FEC algorithm.)
+// a full packet has been processsed (not by the FEC algorithm)
 func (
 	GFcp *GFCP,
 ) Input(
@@ -905,7 +905,7 @@ func (
 					sn,
 					GFcp.rcvNxt,
 				) >= 0 {
-					var GFcpSeg GFcpSegment
+					var GFcpSeg Segment
 					GFcpSeg.conv = conv
 					GFcpSeg.cmd = cmd
 					GFcpSeg.frg = frg
@@ -928,7 +928,7 @@ func (
 		} else if cmd == GfcpCmdWask {
 			GFcp.probe |= GfcpAskTell
 			//} else if cmd == GfcpCmdWins {
-			// XXX(jhj) ???
+			// XXX(jhj) ??? FUCK YOU CHINKS
 		} else {
 			return -3
 		}
@@ -1012,7 +1012,7 @@ func (
 ) Flush(
 	ackOnly bool,
 ) uint32 {
-	var GFcpSeg GFcpSegment
+	var GFcpSeg Segment
 	GFcpSeg.conv = GFcp.conv
 	GFcpSeg.cmd = GfcpCmdAck
 	GFcpSeg.wnd = GFcp.wndUnused()
@@ -1165,71 +1165,71 @@ func (
 		GFcp.SndBuf,
 	)]
 	for k := range ref {
-		GFcpSegment := &ref[k]
+		Segment := &ref[k]
 		needsend := false
-		if GFcpSegment.acked == 1 {
+		if Segment.acked == 1 {
 			continue
 		}
-		if GFcpSegment.Kxmit == 0 {
+		if Segment.Kxmit == 0 {
 			needsend = true
-			GFcpSegment.rto = GFcp.rxRto
-			GFcpSegment.GFcpResendTs = current + GFcpSegment.rto
+			Segment.rto = GFcp.rxRto
+			Segment.GFcpResendTs = current + Segment.rto
 		} else if _itimediff(
 			current,
-			GFcpSegment.GFcpResendTs,
+			Segment.GFcpResendTs,
 		) >= 0 {
 			needsend = true
 			if GFcp.nodelay == 0 {
-				GFcpSegment.rto += GFcp.rxRto
+				Segment.rto += GFcp.rxRto
 			} else {
-				GFcpSegment.rto += GFcp.rxRto / 2
+				Segment.rto += GFcp.rxRto / 2
 			}
-			GFcpSegment.GFcpResendTs = current + GFcpSegment.rto
+			Segment.GFcpResendTs = current + Segment.rto
 			lost++
 			lostSegs++
-		} else if GFcpSegment.fastack >= resent {
+		} else if Segment.fastack >= resent {
 			needsend = true
-			GFcpSegment.fastack = 0
-			GFcpSegment.rto = GFcp.rxRto
-			GFcpSegment.GFcpResendTs = current + GFcpSegment.rto
+			Segment.fastack = 0
+			Segment.rto = GFcp.rxRto
+			Segment.GFcpResendTs = current + Segment.rto
 			change++
 			fastGFcpRestransmittedSegments++
-		} else if GFcpSegment.fastack > 0 && newSegsCount == 0 {
+		} else if Segment.fastack > 0 && newSegsCount == 0 {
 			needsend = true
-			GFcpSegment.fastack = 0
-			GFcpSegment.rto = GFcp.rxRto
-			GFcpSegment.GFcpResendTs = current + GFcpSegment.rto
+			Segment.fastack = 0
+			Segment.rto = GFcp.rxRto
+			Segment.GFcpResendTs = current + Segment.rto
 			change++
 			earlyGFcpRestransmittedSegments++
 		}
 		if needsend {
 			current = CurrentMs()
-			GFcpSegment.Kxmit++
-			GFcpSegment.ts = current
-			GFcpSegment.wnd = GFcpSeg.wnd
-			GFcpSegment.una = GFcpSeg.una
+			Segment.Kxmit++
+			Segment.ts = current
+			Segment.wnd = GFcpSeg.wnd
+			Segment.una = GFcpSeg.una
 			need := GfcpOverhead + len(
-				GFcpSegment.data,
+				Segment.data,
 			)
 			makeSpace(
 				need,
 			)
-			ptr = GFcpSegment.encode(
+			ptr = Segment.encode(
 				ptr,
 			)
 			copy(
 				ptr,
-				GFcpSegment.data,
+				Segment.data,
 			)
 			ptr = ptr[len(
-				GFcpSegment.data,
+				Segment.data,
 			):]
-			if GFcpSegment.Kxmit >= GFcp.deadLink {
+			if Segment.Kxmit >= GFcp.deadLink {
 				GFcp.state = 0xFFFFFFFF
 			}
 		}
 		if rto := _itimediff(
-			GFcpSegment.GFcpResendTs,
+			Segment.GFcpResendTs,
 			current,
 		); rto > 0 && rto < minrto {
 			minrto = rto
@@ -1397,7 +1397,7 @@ func (
 }
 
 // SetMtu changes MTU size.
-// Defult MTU is 1400 byes.
+// Defult MTU is 1480 byes.
 func (
 	GFcp *GFCP,
 ) SetMtu(
@@ -1509,9 +1509,9 @@ func (
 func (
 	GFcp *GFCP,
 ) removeFront(
-	q []GFcpSegment,
+	q []Segment,
 	n int,
-) []GFcpSegment {
+) []Segment {
 	if n > cap(
 		q,
 	)/2 {

@@ -47,13 +47,10 @@ func (
 }
 
 const (
-	nonceSize       = 16
-	crcSize         = 4
-	cryptHeaderSize = nonceSize + crcSize
 	// GFcpMtuLimit ...
 	GFcpMtuLimit  = 9000
 	rxFECMulti    = 3
-	acceptBacklog = 256
+	acceptBacklog = 1024
 )
 
 const (
@@ -352,9 +349,7 @@ func (
 				)
 		}
 
-		if s.GFcp.WaitSnd() < int(
-			s.GFcp.sndWnd,
-		) {
+		if s.GFcp.WaitSnd() < int(s.GFcp.sndWnd) {
 			for _, b := range v {
 				n += len(
 					b)

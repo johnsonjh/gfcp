@@ -12,7 +12,7 @@ package gfcp_test
 
 import (
 	"fmt"
-	"hash/fnv"
+	//	"hash/fnv"
 	"io"
 	"log"
 	"net"
@@ -25,7 +25,7 @@ import (
 
 	"go.gridfinity.dev/gfcp"
 	u "go.gridfinity.dev/leaktestfe"
-	"golang.org/x/crypto/pbkdf2"
+	//	"golang.org/x/crypto/pbkdf2"
 )
 
 const (
@@ -35,7 +35,7 @@ const (
 	portListerner      = "127.0.0.1:9078"
 )
 
-var (
+/*var (
 	key = []byte(
 		"testkey",
 	)
@@ -46,7 +46,7 @@ var (
 		32,
 		fnv.New128a,
 	)
-)
+)*/
 
 func init() {
 	go func() {
@@ -86,14 +86,14 @@ func dialEcho() (
 		true,
 	)
 	sess.SetWindowSize(
-		1024,
-		1024,
+		1380,
+		1380,
 	)
 	sess.SetReadBuffer(
-		16 * 1024 * 1024,
+		64 * 1024 * 1024,
 	)
 	sess.SetWriteBuffer(
-		16 * 1024 * 1024,
+		64 * 1024 * 1024,
 	)
 	sess.SetStreamMode(
 		true,
@@ -108,7 +108,7 @@ func dialEcho() (
 		1400,
 	)
 	sess.SetMtu(
-		1600,
+		9000,
 	)
 	sess.SetMtu(
 		1400,
@@ -146,13 +146,14 @@ func dialSink() (
 		true,
 	)
 	sess.SetWindowSize(
-		1024, 1024,
+		1380,
+		1380,
 	)
 	sess.SetReadBuffer(
-		16 * 1024 * 1024,
+		64 * 1024 * 1024,
 	)
 	sess.SetWriteBuffer(
-		16 * 1024 * 1024,
+		64 * 1024 * 1024,
 	)
 	sess.SetStreamMode(
 		true,
@@ -238,10 +239,10 @@ func echoServer() {
 	go func() {
 		GFcplistener := l.(*gfcp.Listener)
 		GFcplistener.SetReadBuffer(
-			4 * 1024 * 1024,
+			64 * 1024 * 1024,
 		)
 		GFcplistener.SetWriteBuffer(
-			4 * 1024 * 1024,
+			64 * 1024 * 1024,
 		)
 		GFcplistener.SetDSCP(
 			46,
@@ -252,10 +253,10 @@ func echoServer() {
 				return
 			}
 			s.(*gfcp.UDPSession).SetReadBuffer(
-				4 * 1024 * 1024,
+				512 * 1024 * 1024,
 			)
 			s.(*gfcp.UDPSession).SetWriteBuffer(
-				4 * 1024 * 1024,
+				512 * 1024 * 1024,
 			)
 			go handleEcho(s.(*gfcp.UDPSession))
 		}
@@ -272,10 +273,10 @@ func sinkServer() {
 	go func() {
 		GFcplistener := l.(*gfcp.Listener)
 		GFcplistener.SetReadBuffer(
-			4 * 1024 * 1024,
+			64 * 1024 * 1024,
 		)
 		GFcplistener.SetWriteBuffer(
-			4 * 1024 * 1024,
+			64 * 1024 * 1024,
 		)
 		GFcplistener.SetDSCP(
 			46,
@@ -315,8 +316,8 @@ func handleEcho(
 		true,
 	)
 	conn.SetWindowSize(
-		4096,
-		4096,
+		8192,
+		8192,
 	)
 	conn.SetNoDelay(
 		1,
@@ -328,7 +329,7 @@ func handleEcho(
 		46,
 	)
 	conn.SetMtu(
-		1400,
+		1480,
 	)
 	conn.SetACKNoDelay(
 		false,
@@ -370,8 +371,8 @@ func handleSink(
 		true,
 	)
 	conn.SetWindowSize(
-		4096,
-		4096,
+		8192,
+		8192,
 	)
 	conn.SetNoDelay(
 		1,
@@ -1036,6 +1037,9 @@ func TestSnsi(
 	t.Log(
 		gfcp.DefaultSnsi.ToSlice(),
 	)
+	t.Log(
+		"Resetting Snsi counters",
+	)
 	gfcp.DefaultSnsi.Reset()
 	t.Log(
 		gfcp.DefaultSnsi.ToSlice(),
@@ -1058,17 +1062,17 @@ func TestListenerClose(
 	}
 	l.SetReadDeadline(
 		time.Now().Add(
-			time.Second,
+			3 * time.Second,
 		),
 	)
 	l.SetWriteDeadline(
 		time.Now().Add(
-			time.Second,
+			3 * time.Second,
 		),
 	)
 	l.SetDeadline(
 		time.Now().Add(
-			time.Second,
+			3 * time.Second,
 		),
 	)
 	time.Sleep(

@@ -13,8 +13,6 @@ package gfcp // import "go.gridfinity.dev/gfcp"
 import (
 	"crypto/rand"
 	"io"
-
-	hh "github.com/minio/highwayhash"
 )
 
 // Entropy defines a entropy source
@@ -27,7 +25,7 @@ type Entropy interface {
 
 // Nonce ...
 type Nonce struct {
-	seed [hh.Size]byte
+	seed []byte
 }
 
 // Init ...
@@ -54,10 +52,6 @@ func (
 			)
 		}
 	}
-	n.seed = hh.Sum(
-		n.seed[:],
-		n.seed[:],
-	)
 	copy(
 		nonce,
 		n.seed[:],
