@@ -708,12 +708,18 @@ func TestClose(
 func TestParallel(
 	t *testing.T,
 ) {
-	concurrent := 1024
+	concurrent := 128
 	if runtime.GOOS == "darwin" {
 		t.Log(
-			"\n--- WARN: Running on macOS: Retargetting concurrency:\t128",
+			"\n--- WARN: Running on macOS: Retargetting concurrency:\t32",
 		)
-		concurrent = 128
+		concurrent = 32
+	}
+	if runtime.GOOS == "windows" {
+		t.Log(
+			"\n--- WARN: Running on Windows: Retargetting concurrency:\t8",
+		)
+		concurrent = 8
 	}
 	t.Log(
 		fmt.Sprintf(
