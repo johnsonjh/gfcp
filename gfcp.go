@@ -23,26 +23,26 @@ import (
 // Gfcp protocol constants
 const (
 	GfcpRtoNdl     = 20  // GfcpRtoNdl:	NoDelay min RTO
-	GfcpRtoMin     = 220 // GfcpRtoMin:	Regular min RTO
+	GfcpRtoMin     = 120 // GfcpRtoMin:	Regular min RTO
 	GfcpRtoDef     = 340
-	GfcpRtoMax     = 10000
+	GfcpRtoMax     = 60000
 	GfcpCmdPush    = 81 // GfcpCmdPush:	Push data
 	GfcpCmdAck     = 82 // GfcpCmdAck:	Ack
 	GfcpCmdWask    = 83 // GfcpCmdWask:	Get Window Size
 	GfcpCmdWins    = 84 // GfcpCmdWins:	Set window Size
 	GfcpAskSend    = 1  // GfcpAskSend:	Need to send GfcpCmdWask
 	GfcpAskTell    = 2  // GfcpAskTell:	Need to send GfcpCmdWins
-	GfcpWndSnd     = 64
-	GfcpWndRcv     = 64
+	GfcpWndSnd     = 32
+	GfcpWndRcv     = 32
 	GfcpMtuDef     = 1480
-	GfcpAckFast    = 2
-	GfcpInterval   = 70
+	GfcpAckFast    = 3
+	GfcpInterval   = 100
 	GfcpOverhead   = 24
-	GfcpDeadLink   = 12
-	GfcpThreshInit = 3
+	GfcpDeadLink   = 20
+	GfcpThreshInit = 2
 	GfcpThreshMin  = 2
-	GfcpProbeInit  = 7000  // 7s initial probe window
-	GfcpProbeLimit = 90000 // 90s hard probe timeout
+	GfcpProbeInit  = 7000   // 7s initial probe window
+	GfcpProbeLimit = 102000 // 120s hard probe timeout
 )
 
 type outputCallback func(
@@ -1397,7 +1397,6 @@ func (
 }
 
 // SetMtu changes MTU size.
-// Defult MTU is 1480 byes.
 func (
 	GFcp *GFCP,
 ) SetMtu(
@@ -1417,7 +1416,7 @@ func (
 	)
 	/*if buffer == nil {
 		return -2
-	}*/ // XXX(jhj): buffer can't be nil
+	}*/ // XXX(jhj): buffer can't be nil?
 	GFcp.mtu = uint32(
 		mtu,
 	)

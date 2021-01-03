@@ -18,7 +18,7 @@ import (
 	"go.gridfinity.dev/gfcp"
 )
 
-func BenchmarkFECDecode(
+func BenchmarkFECDecode1500(
 	b *testing.B,
 ) {
 	const (
@@ -64,12 +64,84 @@ func BenchmarkFECDecode(
 	}
 }
 
-func BenchmarkFECEncode(
+func BenchmarkFECEncode1500(
 	b *testing.B,
 ) {
 	const dataSize = 10
 	const paritySize = 3
 	const payLoad = 1500
+	b.ReportAllocs()
+	b.SetBytes(
+		payLoad,
+	)
+	Encoder := gfcp.NewFECEncoder(
+		dataSize,
+		paritySize,
+		0,
+	)
+	for i := 0; i < b.N; i++ {
+		data := make(
+			[]byte,
+			payLoad,
+		)
+		Encoder.Encode(
+			data,
+		)
+	}
+}
+
+func BenchmarkFECDecode9000(
+	b *testing.B,
+) {
+	const (
+		dataSize   = 10
+		paritySize = 3
+		payLoad    = 9000
+	)
+	decoder := gfcp.NewFECDecoder(
+		1024,
+		dataSize,
+		paritySize,
+	)
+	b.ReportAllocs()
+	b.SetBytes(
+		payLoad,
+	)
+	for i := 0; i < b.N; i++ {
+		if rand.Int()%(dataSize+paritySize) == 0 {
+			continue
+		}
+		pkt := make(
+			[]byte,
+			payLoad,
+		)
+		binary.LittleEndian.PutUint32(
+			pkt,
+			uint32(i),
+		)
+		if i%(dataSize+paritySize) >= dataSize {
+			binary.LittleEndian.PutUint16(
+				pkt[4:],
+				gfcp.KTypeParity,
+			)
+		} else {
+			binary.LittleEndian.PutUint16(
+				pkt[4:],
+				gfcp.KTypeData,
+			)
+		}
+		decoder.Decode(
+			pkt,
+		)
+	}
+}
+
+func BenchmarkFECEncode9000(
+	b *testing.B,
+) {
+	const dataSize = 10
+	const paritySize = 3
+	const payLoad = 9000
 	b.ReportAllocs()
 	b.SetBytes(
 		payLoad,
