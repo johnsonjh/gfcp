@@ -1,7 +1,7 @@
 // Copyright © 2015 Daniel Fu <daniel820313@gmail.com>.
 // Copyright © 2019 Loki 'l0k18' Verloren <stalker.loki@protonmail.ch>.
-// Copyright © 2020 Gridfinity, LLC. <admin@gridfinity.com>.
-// Copyright © 2020 Jeffrey H. Johnson <jeff@gridfinity.com>.
+// Copyright © 2021 Gridfinity, LLC. <admin@gridfinity.com>.
+// Copyright © 2021 Jeffrey H. Johnson <jeff@gridfinity.com>.
 //
 // All rights reserved.
 //
@@ -12,7 +12,6 @@ package gfcp_test
 
 import (
 	"fmt"
-	//	"hash/fnv"
 	"io"
 	"log"
 	"net"
@@ -25,7 +24,6 @@ import (
 
 	"go.gridfinity.dev/gfcp"
 	u "go.gridfinity.dev/leaktestfe"
-	//	"golang.org/x/crypto/pbkdf2"
 )
 
 const (
@@ -34,19 +32,6 @@ const (
 	portTinyBufferEcho = "127.0.0.1:29609"
 	portListerner      = "127.0.0.1:9078"
 )
-
-/*var (
-	key = []byte(
-		"testkey",
-	)
-	pass = pbkdf2.Key(
-		key,
-		[]byte(portSink),
-		4096,
-		32,
-		fnv.New128a,
-	)
-)*/
 
 func init() {
 	go func() {
