@@ -727,7 +727,7 @@ func TestParallel(
 		concurrent,
 	)
 	for i := 0; i < concurrent; i++ {
-		go parallel_client(
+		go parallelClient(
 			&wg,
 		)
 	}
@@ -746,7 +746,7 @@ func TestParallel(
 	)
 }
 
-func parallel_client(
+func parallelClient(
 	wg *sync.WaitGroup,
 ) (
 	err error,
@@ -758,7 +758,7 @@ func parallel_client(
 		)
 	}
 
-	err = echo_tester(
+	err = echoTester(
 		cli,
 		64,
 		64,
@@ -852,7 +852,7 @@ func speedclient(
 		)
 	}
 
-	if err := echo_tester(
+	if err := echoTester(
 		cli,
 		nbytes,
 		b.N,
@@ -949,7 +949,7 @@ func sinkclient(
 			err,
 		)
 	}
-	sink_tester(
+	sinkTester(
 		cli,
 		nbytes,
 		b.N,
@@ -961,7 +961,7 @@ func sinkclient(
 	)
 }
 
-func echo_tester(
+func echoTester(
 	cli net.Conn,
 	msglen,
 	msgcount int,
@@ -983,18 +983,17 @@ func echo_tester(
 			)
 			if err != nil {
 				return err
-			} else {
-				nrecv += n
-				if nrecv == msglen {
-					break
-				}
+			}
+			nrecv += n
+			if nrecv == msglen {
+				break
 			}
 		}
 	}
 	return nil
 }
 
-func sink_tester(
+func sinkTester(
 	cli *gfcp.UDPSession,
 	msglen,
 	msgcount int,
