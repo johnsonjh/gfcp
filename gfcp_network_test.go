@@ -365,9 +365,7 @@ func test(
 			binary.Write(
 				buf,
 				binary.LittleEndian,
-				uint32(
-					current,
-				),
+				current,
 			)
 			gfcp1.Send(
 				buf.Bytes(),
@@ -452,9 +450,7 @@ func test(
 				binary.LittleEndian,
 				&ts,
 			)
-			rtt = uint32(
-				current,
-			) - ts
+			rtt = (current - ts)
 
 			if sn != uint32(
 				next,

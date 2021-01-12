@@ -11,5 +11,5 @@ require (
 	go4.org v0.0.0-20201209231011-d4a079459e60
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b
 	golang.org/x/sys v0.0.0-20210112091331-59c308dcf3cc // indirect
-	golang.org/x/tools v0.0.0-20210111221946-d33bae441459 // indirect
+	golang.org/x/tools v0.0.0-20210112183307-1e6ecd4bf1b0 // indirect
 )
