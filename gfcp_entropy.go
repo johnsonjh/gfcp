@@ -44,7 +44,7 @@ func (
 	if n.seed[0] == 0 {
 		_, err = io.ReadFull(
 			rand.Reader,
-			n.seed[:],
+			n.seed,
 		)
 		if err != nil {
 			panic(
@@ -54,6 +54,6 @@ func (
 	}
 	copy(
 		nonce,
-		n.seed[:],
+		n.seed,
 	)
 }
