@@ -53,4 +53,3 @@
 ### License
 
 - [The MIT License](https://gitlab.gridfinity.com/go/gfcp/-/blob/master/LICENSE)
-
