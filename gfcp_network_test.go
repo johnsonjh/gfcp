@@ -20,7 +20,7 @@ import (
 	"testing"
 	"time"
 
-	"go.gridfinity.dev/gfcp"
+	"github.com/johnsonjh/gfcp"
 )
 
 func iclock() int32 {

@@ -22,8 +22,8 @@ import (
 	"testing"
 	"time"
 
-	"go.gridfinity.dev/gfcp"
-	u "go.gridfinity.dev/leaktestfe"
+	"github.com/johnsonjh/gfcp"
+	u "github.com/johnsonjh/leaktestfe"
 )
 
 const (

@@ -15,7 +15,7 @@ import (
 	"runtime"
 	"testing"
 
-	u "go.gridfinity.dev/leaktestfe"
+	u "github.com/johnsonjh/leaktestfe"
 	licn "go4.org/legal"
 )
 

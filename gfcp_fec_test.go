@@ -15,7 +15,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"go.gridfinity.dev/gfcp"
+	"github.com/johnsonjh/gfcp"
 )
 
 func BenchmarkFECDecode1500(
