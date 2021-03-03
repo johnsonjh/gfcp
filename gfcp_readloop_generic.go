@@ -1,4 +1,4 @@
-// Copyright © 2021 Jeffrey H. Johnson <trnsz@pobox.com>.  
+// Copyright © 2021 Jeffrey H. Johnson <trnsz@pobox.com>.
 // Copyright © 2015 Daniel Fu <daniel820313@gmail.com>.
 // Copyright © 2019 Loki 'l0k18' Verloren <stalker.loki@protonmail.ch>.
 // Copyright © 2021 Gridfinity, LLC. <admin@gridfinity.com>.
@@ -8,6 +8,7 @@
 // All use of this code is governed by the MIT license.
 // The complete license is available in the LICENSE file.
 
+//go:build !linux
 // +build !linux
 
 package gfcp
