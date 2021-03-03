@@ -18,31 +18,6 @@
 
 ---
 
-### Availability
-
-#### Go Modules
-
-- [go.gridfinity.dev](https://go.gridfinity.dev/gfcp)
-- [go.gridfinity.com](https://go.gridfinity.com)
-
-#### Source Code
-
-- [Gridfinity GitHub](https://gitlab.gridfinity.com/go/gfcp)
-- [GitHub](https://github.com/gridfinity/gfcp)
-
-### Documentation
-
-- [GoDocs](https://go.gridfinity.dev/doc?gfcp)
-- [Gridfinity Wiki](https://wiki.gridfinity.com/wiki?name=gfcp)
-
-### Issue Tracking
-
-- [Gridfinity GitLab Issues](https://gitlab.gridfinity.com/go/gfcp/-/issues)
-
-### Security Policy
-
-- [Security Policy and Vulnerability Reporting](https://gitlab.gridfinity.com/go/gfcp/-/blob/master/SECURITY.md)
-
 ### Original Authors
 
 - [Daniel 'Xtaci' Fu](https://github.com/xtaci)
@@ -52,4 +27,4 @@
 
 ### License
 
-- [The MIT License](https://gitlab.gridfinity.com/go/gfcp/-/blob/master/LICENSE)
+- The MIT License

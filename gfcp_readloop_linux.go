@@ -1,3 +1,4 @@
+// Copyright © 2021 Jeffrey H. Johnson <trnsz@pobox.com>.  
 // Copyright © 2015 Daniel Fu <daniel820313@gmail.com>.
 // Copyright © 2019 Loki 'l0k18' Verloren <stalker.loki@protonmail.ch>.
 // Copyright © 2021 Gridfinity, LLC. <admin@gridfinity.com>.
@@ -9,7 +10,7 @@
 
 // +build linux
 
-package gfcp // import "go.gridfinity.dev/gfcp"
+package gfcp
 
 import (
 	"net"
