@@ -18,7 +18,7 @@
 ### Availability
 
 - [GitHub](https://github.com/johnsonjh/gfcp)
-- [GitLab](https://gitlab.com/johnsonjh/gitlab)
+- [GitLab](https://gitlab.com/johnsonjh/gfcp)
 - [SourceHut](https://sr.ht/~trn/gfcp)
 - [NotABug](https://notabug.org/trn/gfcp)
 
