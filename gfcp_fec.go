@@ -229,7 +229,7 @@ func (
 					)
 					shards[k] = shards[k][:maxlen]
 					copy(shards[k][dlen:], dec.zeros)
-				} else {
+				} else if k < dec.dataShards {
 					shards[k] = KxmitBuf.Get().([]byte)[:0]
 				}
 			}

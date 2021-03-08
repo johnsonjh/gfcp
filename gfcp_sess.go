@@ -832,10 +832,10 @@ func (
 				if f.flag() == KTypeParity {
 					fecParityShards++
 				}
+				s.mu.Lock()
 				recovers := s.FecDecoder.Decode(
 					f,
 				)
-				s.mu.Lock()
 				waitsnd := s.GFcp.WaitSnd()
 				if f.flag() == KTypeData {
 					if ret := s.GFcp.Input(
