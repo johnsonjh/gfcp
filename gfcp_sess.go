@@ -48,7 +48,7 @@ func (
 
 const (
 	// GFcpMtuLimit ...
-	GFcpMtuLimit  = 1500
+	GFcpMtuLimit  = 9000
 	rxFECMulti    = 3
 	acceptBacklog = 1024
 )
