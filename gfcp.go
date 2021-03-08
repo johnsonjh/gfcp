@@ -1154,7 +1154,6 @@ func (
 	}
 	current := CurrentMs()
 	var change,
-		lost,
 		lostSegs,
 		fastGFcpRestransmittedSegments,
 		earlyGFcpRestransmittedSegments uint64
@@ -1185,7 +1184,6 @@ func (
 				Segment.rto += GFcp.rxRto / 2
 			}
 			Segment.GFcpResendTs = current + Segment.rto
-			lost++
 			lostSegs++
 		} else if Segment.fastack >= resent {
 			needsend = true
@@ -1273,7 +1271,7 @@ func (
 			GFcp.cwnd = GFcp.ssthresh + resent
 			GFcp.incr = GFcp.cwnd * GFcp.mss
 		}
-		if lost > 0 {
+		if lostSegs > 0 {
 			GFcp.ssthresh = cwnd / 2
 			if GFcp.ssthresh < GfcpThreshMin {
 				GFcp.ssthresh = GfcpThreshMin
