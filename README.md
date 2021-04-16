@@ -4,7 +4,7 @@
 
 ### A high-speed variant of the KCP ARQ transport for Go
 
-----
+---
 
 ### KCP Original Authors
 
@@ -13,7 +13,7 @@
 - [Loki 'l0k18' Verloren](https://github.com/l0k18)
   [\<stalker.loki@protonmail.ch\>](mailto:stalker.loki@protonmail.ch)
 
-----
+---
 
 ### Availability
 
@@ -22,10 +22,10 @@
 - [SourceHut](https://sr.ht/~trn/gfcp)
 - [NotABug](https://notabug.org/trn/gfcp)
 
-----
+---
 
 ### License
 
 - The MIT License
 
-----
+---
