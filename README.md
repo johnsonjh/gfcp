@@ -29,6 +29,6 @@
 
 ### License
 
-- The MIT License
+- [The MIT License](https://github.com/johnsonjh/gfcp/blob/master/LICENSE)
 
 ---
