@@ -1,5 +1,7 @@
 # GFCP
 
+[![GRC](https://goreportcard.com/badge/github.com/johnsonjh/gfcp)](https://goreportcard.com/badge/github.com/johnsonjh/gfcp)
+
 ## GF Control Protocol
 
 ### A high-speed variant of the KCP ARQ transport for Go
