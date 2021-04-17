@@ -1,6 +1,7 @@
 # GFCP
 
 [![GRC](https://goreportcard.com/badge/github.com/johnsonjh/gfcp)](https://goreportcard.com/badge/github.com/johnsonjh/gfcp)
+[![Maintainability](https://api.codeclimate.com/v1/badges/0d4da1285af16833fb2b/maintainability)](https://codeclimate.com/github/johnsonjh/gfcp/maintainability)
 
 ## GF Control Protocol
 
