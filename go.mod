@@ -10,6 +10,6 @@ require (
 	go.uber.org/goleak v1.1.11-0.20200902203756-89d54f0adef2
 	go4.org v0.0.0-20201209231011-d4a079459e60
 	golang.org/x/net v0.0.0-20210505214959-0714010a04ed
-	golang.org/x/sys v0.0.0-20210503173754-0981d6026fa6 // indirect
-	golang.org/x/tools v0.1.1-0.20210506031521-d1ea2c78a568 // indirect
+	golang.org/x/sys v0.0.0-20210507014357-30e306a8bba5 // indirect
+	golang.org/x/tools v0.1.1-0.20210506192834-c0140e85e11c // indirect
 )
