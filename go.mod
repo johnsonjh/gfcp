@@ -9,7 +9,7 @@ require (
 	github.com/pkg/errors v0.9.2-0.20201214064552-5dd12d0cfe7f
 	go.uber.org/goleak v1.1.11-0.20200902203756-89d54f0adef2
 	go4.org v0.0.0-20201209231011-d4a079459e60
-	golang.org/x/net v0.0.0-20210505214959-0714010a04ed
-	golang.org/x/sys v0.0.0-20210507014357-30e306a8bba5 // indirect
-	golang.org/x/tools v0.1.1-0.20210506192834-c0140e85e11c // indirect
+	golang.org/x/net v0.0.0-20210508051633-16afe75a6701
+	golang.org/x/sys v0.0.0-20210507161434-a76c4d0a0096 // indirect
+	golang.org/x/tools v0.1.1-0.20210507205639-f05e912406e9 // indirect
 )
