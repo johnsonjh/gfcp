@@ -3,7 +3,7 @@ module github.com/johnsonjh/gfcp
 go 1.17
 
 require (
-	github.com/johnsonjh/leaktestfe v0.0.0-20211209070910-8867fa9b8525
+	github.com/johnsonjh/leaktestfe v0.0.0-20220404202031-62cc076563b5
 	github.com/klauspost/reedsolomon v1.9.17-0.20220324122540-2f19c81be4b5
 	github.com/pkg/errors v0.9.2-0.20201214064552-5dd12d0cfe7f
 	go4.org v0.0.0-20201209231011-d4a079459e60
