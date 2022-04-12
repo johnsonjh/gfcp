@@ -9,10 +9,13 @@
 
 ---
 
-### KCP Original Authors
+### KCP Original Author
 
 - [Daniel 'Xtaci' Fu](https://github.com/xtaci)
   [\<daniel820313@gmail.com\>](mailto:imap@live.com)
+
+### Additional KCP Modifications
+
 - [Loki 'l0k18' Verloren](https://github.com/l0k18)
   [\<stalker.loki@protonmail.ch\>](mailto:stalker.loki@protonmail.ch)
 
