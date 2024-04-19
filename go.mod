@@ -7,11 +7,11 @@ require (
 	github.com/klauspost/reedsolomon v1.11.4-0.20221130175039-76765c1d282d
 	github.com/pkg/errors v0.9.2-0.20201214064552-5dd12d0cfe7f
 	go4.org v0.0.0-20230225012048-214862532bf5
-	golang.org/x/net v0.17.0
+	golang.org/x/net v0.23.0
 )
 
 require (
 	github.com/klauspost/cpuid/v2 v2.2.2 // indirect
 	go.uber.org/goleak v1.2.1 // indirect
-	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
 )
