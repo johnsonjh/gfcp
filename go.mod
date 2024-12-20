@@ -1,17 +1,17 @@
 module github.com/johnsonjh/gfcp
 
-go 1.17
+go 1.21
 
 require (
-	github.com/johnsonjh/leaktestfe v0.0.0-20230308203709-32b9101894df
-	github.com/klauspost/reedsolomon v1.11.4-0.20221130175039-76765c1d282d
+	github.com/johnsonjh/leaktestfe v0.0.0-20241023172206-258a63d8b8de
+	github.com/klauspost/reedsolomon v1.12.4
 	github.com/pkg/errors v0.9.2-0.20201214064552-5dd12d0cfe7f
 	go4.org v0.0.0-20230225012048-214862532bf5
-	golang.org/x/net v0.23.0
+	golang.org/x/net v0.33.0
 )
 
 require (
-	github.com/klauspost/cpuid/v2 v2.2.2 // indirect
-	go.uber.org/goleak v1.2.1 // indirect
-	golang.org/x/sys v0.18.0 // indirect
+	github.com/klauspost/cpuid/v2 v2.2.10-0.20241128153506-78c3c03144af // indirect
+	go.uber.org/goleak v1.3.1-0.20241121203838-4ff5fa6529ee // indirect
+	golang.org/x/sys v0.28.1-0.20241217161349-a7f19e9c2041 // indirect
 )
